@@ -1,0 +1,55 @@
+###################
+# Compiled source #
+###################
+target/
+*.class
+
+
+###################
+# Temporary Files #
+###################
+
+#gedit
+*~
+
+
+###################
+# Other VCS Files #
+###################
+
+#subversion
+.svn/
+
+
+###########################
+# Per-developer IDE Files #
+###########################
+
+# Netbeans
+nbactions*.xml
+!nbactions-RSRG-Global.xml
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+
+
+#######################
+# Per-Developer Files #
+#######################
+developer.properties
+
+
+######################
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
