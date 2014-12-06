@@ -31,8 +31,8 @@ import setvis.Restaurant.RestaurantBuilder;
 import java.util.*;
 
 /**
- * <p>The main driver for an interactive, seattle restaurant lineset based
- * visualization.</p>
+ * <p>The main driver for an interactive, lineset-based visualization of
+ * downtown seattle restaurants.</p>
  *
  * @author DWelch <dtw.welch@gmail.com>
 */
