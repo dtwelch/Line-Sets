@@ -15,22 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with LineSets. If not, see http://www.gnu.org/licenses/.
  */
-package setvis;
+package setvis.tspandgraph;
 
-import processing.core.PApplet;
+public interface MininimumSpan<V extends Comparable<V>, E extends Edge<V>> {
 
-/**
- * <p>Starts the main application.</p>
- *
- * @author Dwelch <dtw.welch@gmail.com>
- */
-public class Main {
-
-    /**
-     * @param args Arguments are ignored.
-     */
-    public static void main(String[] args) {
-        PApplet.main("setvis.LineSets");
-    }
-
+    public Graph<V, E> findMinimumSpan();
 }

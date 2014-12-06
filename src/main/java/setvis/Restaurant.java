@@ -24,7 +24,7 @@ import de.fhpotsdam.unfolding.geo.Location;
  * from the original {@link processing.data.JSONObject}, as found in the
  * original <tt>yelpAPI</tt> search results.</p>
  *
- * @author DWelch <dtw.welch@gmail.com>
+ * @author Dwelch <dtw.welch@gmail.com>
  */
 public class Restaurant {
 

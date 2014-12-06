@@ -34,7 +34,7 @@ import java.util.*;
  * <p>The main driver for an interactive, lineset-based visualization of
  * restaurants in downtown Seattle.</p>
  *
- * @author DWelch <dtw.welch@gmail.com>
+ * @author Dwelch <dtw.welch@gmail.com>
 */
 public class LineSets extends PApplet {
 
@@ -50,7 +50,7 @@ public class LineSets extends PApplet {
     private float plotX1, plotY1, plotX2, plotY2;
 
     @Override public void setup() {
-        size(500, 500);
+        size(700, 600);
         plotX1 = 0; plotY1 = 0;
         plotX2 = width; plotY2 = 60;
 
@@ -59,8 +59,7 @@ public class LineSets extends PApplet {
         preprocessInput();
     }
 
-    @Override
-    public void draw() {
+    @Override public void draw() {
         myBackgroundMap.draw();
         drawCategoryPanels();
 

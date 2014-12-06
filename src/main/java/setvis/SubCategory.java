@@ -18,7 +18,7 @@
 package setvis;
 
 /**
- * @author DWelch <dtw.welch@gmail.com>
+ * @author Dwelch <dtw.welch@gmail.com>
  */
 public interface SubCategory {
 
