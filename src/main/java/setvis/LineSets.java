@@ -32,7 +32,7 @@ import java.util.*;
 
 /**
  * <p>The main driver for an interactive, lineset-based visualization of
- * downtown seattle restaurants.</p>
+ * restaurants in downtown Seattle.</p>
  *
  * @author DWelch <dtw.welch@gmail.com>
 */
@@ -44,16 +44,18 @@ public class LineSets extends PApplet {
     private final HashMap<SubCategory, List<Restaurant>> myActiveSelections =
             new HashMap<>();
 
-    private UnfoldingMap myBackgroundMap;
     private ControlP5 myControls;
 
+    private UnfoldingMap myBackgroundMap;
     private float plotX1, plotY1, plotX2, plotY2;
 
     @Override public void setup() {
         size(500, 500);
+        plotX1 = 0; plotY1 = 0;
+        plotX2 = width; plotY2 = 60;
 
         createMapBackground();
-
+        createCategoryControlPanel();
         preprocessInput();
     }
 
@@ -62,6 +64,20 @@ public class LineSets extends PApplet {
         myBackgroundMap.draw();
         drawCategoryPanels();
 
+    }
+
+    /**
+     * <p>Initializes and sets parameters such as default zoom levels and
+     * panning boundaries for the background citymap.</p>
+     */
+    private void createMapBackground() {
+        myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
+        myBackgroundMap.zoomAndPanTo(12, new Location(47.626, -122.337));
+        myBackgroundMap.zoomToLevel(13);
+        myBackgroundMap.setBackgroundColor(0);
+
+        MapUtils.createDefaultEventDispatcher(this, myBackgroundMap);
+        myBackgroundMap.setTweening(true);
     }
 
     private void drawCategoryPanels() {
@@ -75,17 +91,16 @@ public class LineSets extends PApplet {
     }
 
     public void createCategoryControlPanel(){
-        myControls = new ControlP5(this);
-        myControls.setControlFont(createFont("Helvetica-Bold", 8));
+        myControls =
+                new ControlP5(this, createFont("Helvetica-Bold", 8));
         frameRate(25);
 
         Button american = myControls.addButton("American");
-        american.setValue(0)
-                .setPosition(plotX1 + 20, plotY1 + 35)
+        american.setPosition(plotX1 + 20, plotY1 + 35)
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
-                .setColorActive(Restaurant.RestaurantType.AMERICAN.getColor())
+                .setColorActive(RestaurantType.AMERICAN.getColor())
                 .setSwitch(true);
 
         Button italian = myControls.addButton("Italian");
@@ -94,7 +109,7 @@ public class LineSets extends PApplet {
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
-                .setColorActive(Restaurant.RestaurantType.ITALIAN.getColor())
+                .setColorActive(RestaurantType.ITALIAN.getColor())
                 .setSwitch(true);
 
         Button asian = myControls.addButton("Asian");
@@ -103,7 +118,7 @@ public class LineSets extends PApplet {
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
-                .setColorActive(Restaurant.RestaurantType.ASIAN.getColor())
+                .setColorActive(RestaurantType.ASIAN.getColor())
                 .setSwitch(true);
 
         Button mexican = myControls.addButton("Mexican");
@@ -112,15 +127,16 @@ public class LineSets extends PApplet {
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
-                .setColorActive(Restaurant.RestaurantType.MEXICAN.getColor())
+                .setColorActive(RestaurantType.MEXICAN.getColor())
                 .setSwitch(true);
     }
 
     private void American(int theValue) {
-        updateSelection("American", Restaurant.RestaurantType.AMERICAN);
+        System.out.println("theValue: " + theValue);
+        //updateSelection("American", Restaurant.RestaurantType.AMERICAN);
     }
 
-    private void updateSelection(String controllerName, SubCategory category) {
+    /*private void updateSelection(String controllerName, SubCategory category) {
         if ( ((Button) myControls.controller(controllerName)).isOn()) {
             List<Restaurant> selected = mySubCategories.get(category);
             myActiveSelections.get(category).addAll(selected);
@@ -128,20 +144,7 @@ public class LineSets extends PApplet {
         else {
             myActiveSelections.get(category).clear();
         }
-    }
-
-    /**
-     * <p></p>
-     */
-    private void createMapBackground() {
-        myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
-        myBackgroundMap.zoomAndPanTo(12, new Location(47.626, -122.337));
-        myBackgroundMap.zoomToLevel(13);
-        myBackgroundMap.setBackgroundColor(0);
-
-        MapUtils.createDefaultEventDispatcher(this, myBackgroundMap);
-        myBackgroundMap.setTweening(true);
-    }
+    }*/
 
     private void preprocessInput() {
         JSONArray rawData =
@@ -210,6 +213,7 @@ public class LineSets extends PApplet {
         }
         return result;
     }
+
 
     /**
      * <p>Sounds the alarm if the entry we're trying to add shares an ID

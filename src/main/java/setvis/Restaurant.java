@@ -1,16 +1,17 @@
-/* This file is part of 'LineSets', a final project for cpsc804: Data
+/*
+ * This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
- *
+ * 
  * LineSets is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * LineSets is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with LineSets. If not, see http://www.gnu.org/licenses/.
  */
@@ -145,18 +146,22 @@ public class Restaurant {
         }
 
         public RestaurantBuilder location(Location location) {
-            myLocation = location; return this;
+            myLocation = location;
+            return this;
         }
 
         public RestaurantBuilder id(String id) {
-            myID = id; return this;
+            myID = id;
+            return this;
         }
 
         public RestaurantBuilder type(RestaurantType type) {
-            myType = type; return this;
+            myType = type;
+            return this;
         }
 
-        @Override public Restaurant build() {
+        @Override
+        public Restaurant build() {
             if (myType == null) {
                 throw new IllegalStateException("Null restaurant type. All"
                         + " restaurants must have a type.");
