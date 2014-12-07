@@ -122,6 +122,10 @@ public class Restaurant {
         return myID.hashCode();
     }
 
+    @Override public String toString() {
+        return myName;
+    }
+
     public boolean equals(Object o) {
         boolean result = (o instanceof Restaurant);
 
