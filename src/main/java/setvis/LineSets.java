@@ -22,6 +22,12 @@ import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.utils.MapUtils;
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.alg.DijkstraShortestPath;
+import org.jgrapht.alg.KruskalMinimumSpanningTree;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleWeightedGraph;
 import processing.core.PApplet;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -57,6 +63,8 @@ public class LineSets extends PApplet {
         createMapBackground();
         createCategoryControlPanel();
         preprocessInput();
+
+        computeRestaurantOrderings();
     }
 
     @Override public void draw() {
@@ -77,6 +85,32 @@ public class LineSets extends PApplet {
 
         MapUtils.createDefaultEventDispatcher(this, myBackgroundMap);
         myBackgroundMap.setTweening(true);
+    }
+
+    private void computeRestaurantOrderings() {
+        SimpleWeightedGraph<Restaurant, DefaultWeightedEdge> g =
+                new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
+
+        List<Restaurant> usRestaurants = mySubCategories.get(RestaurantType
+                .AMERICAN);
+        for (Restaurant r : usRestaurants) {
+            g.addVertex(r);
+        }
+
+        for (Restaurant r : usRestaurants) {
+            for (Restaurant e : mySubCategories.get(RestaurantType.AMERICAN)) {
+                if (!e.equals(r)) {
+                    g.addEdge(r, e);
+                    g.setEdgeWeight(g.getEdge(r, e),
+                            r.getLocation().getDistance(e.getLocation()));
+                }
+            }
+        }
+
+        DijkstraShortestPath.findPathBetween(g,usRestaurants.get(2),
+                usRestaurants.get(1));
+
+        KruskalMinimumSpanningTree
     }
 
     private void drawCategoryPanels() {

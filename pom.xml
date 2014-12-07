@@ -162,9 +162,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.jgrapht</groupId>
-            <artifactId>jgrapht-jdk1.5</artifactId>
-            <version>0.7.3</version>
+            <groupId>org.javabits.jgrapht</groupId>
+            <artifactId>jgrapht-ext-bundle</artifactId>
+            <version>0.9.3</version>
         </dependency>
     </dependencies>
 </project>

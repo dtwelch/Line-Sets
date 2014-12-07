@@ -118,16 +118,17 @@ public class Restaurant {
         return myType;
     }
 
-    public String getRestaurantName() {
-        return myName;
-    }
-
-    public String getID() {
-        return myID;
-    }
-
     public int hashCode() {
         return myID.hashCode();
+    }
+
+    public boolean equals(Object o) {
+        boolean result = (o instanceof Restaurant);
+
+        if (result) {
+            result = ((Restaurant) o).myID.equals(myID);
+        }
+        return result;
     }
 
     public static class RestaurantBuilder implements Builder<Restaurant> {
