@@ -20,9 +20,7 @@ import controlP5.Button;
 import controlP5.ControlP5;
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
-import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.Google;
-import de.fhpotsdam.unfolding.providers.MapBox;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import org.jgrapht.Graphs;
@@ -46,10 +44,10 @@ import java.util.*;
 */
 public class LineSets extends PApplet {
 
-    private final Map<SubCategory, List<Restaurant>> mySubCategories =
+    private final Map<Category, List<Restaurant>> mySubCategories =
             new HashMap<>();
 
-    private final Map<SubCategory, List<Restaurant>> myActiveSelections =
+    private final Map<Category, List<Restaurant>> myActiveSelections =
             new HashMap<>();
 
     private ControlP5 myControls;
@@ -82,7 +80,7 @@ public class LineSets extends PApplet {
      */
     private void drawActiveCurves() {
 
-        for (Map.Entry<SubCategory, List<Restaurant>> e : myActiveSelections
+        for (Map.Entry<Category, List<Restaurant>> e : myActiveSelections
                 .entrySet()) {
             List<Restaurant> curRestaurants = e.getValue();
 
@@ -92,8 +90,8 @@ public class LineSets extends PApplet {
                         .get(curRestaurants.size() - 1));
 
                 beginShape();
-                stroke(e.getKey().getColor());
-                strokeWeight(5);
+                stroke(e.getKey().getSubCategoryColor());
+                strokeWeight(6);
                 noFill();
                 curveVertex(first.x, first.y);
 
@@ -101,7 +99,7 @@ public class LineSets extends PApplet {
                     ScreenPosition curPosition = toScreenPosition(r);
                     curveVertex(curPosition.x, curPosition.y);
 
-                    ellipse(curPosition.x, curPosition.y, 7, 7);
+                    ellipse(curPosition.x, curPosition.y, 9, 9);
                 }
                 curveVertex(last.x, last.y);
                 endShape();
@@ -146,7 +144,7 @@ public class LineSets extends PApplet {
     }
 
     private void computeAndUpdateRestaurantOrderings() {
-        for (Map.Entry<SubCategory, List<Restaurant>> e : mySubCategories
+        for (Map.Entry<Category, List<Restaurant>> e : mySubCategories
                 .entrySet()) {
             computeAndUpdateRestaurantOrderings(e.getKey());
         }
@@ -155,7 +153,7 @@ public class LineSets extends PApplet {
     /**
      * <p>Writeme.</p>
      */
-    private void computeAndUpdateRestaurantOrderings(SubCategory category) {
+    private void computeAndUpdateRestaurantOrderings(Category category) {
         SimpleWeightedGraph<Restaurant, DefaultWeightedEdge> g =
                 new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
@@ -213,7 +211,7 @@ public class LineSets extends PApplet {
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.AMERICAN.getColor())
+                .setColorActive(RestaurantType.AMERICAN.getSubCategoryColor())
                 .setSwitch(true);
 
 
@@ -222,7 +220,7 @@ public class LineSets extends PApplet {
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.ITALIAN.getColor())
+                .setColorActive(RestaurantType.ITALIAN.getSubCategoryColor())
                 .setSwitch(true);
 
         Button asian = myControls.addButton("Asian");
@@ -230,7 +228,7 @@ public class LineSets extends PApplet {
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.ASIAN.getColor())
+                .setColorActive(RestaurantType.ASIAN.getSubCategoryColor())
                 .setSwitch(true);
 
         Button mexican = myControls.addButton("Mexican");
@@ -238,7 +236,7 @@ public class LineSets extends PApplet {
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.MEXICAN.getColor())
+                .setColorActive(RestaurantType.MEXICAN.getSubCategoryColor())
                 .setSwitch(true);
     }
 
@@ -246,26 +244,38 @@ public class LineSets extends PApplet {
         updateActiveSelection("American", RestaurantType.AMERICAN);
     }
 
-    private void updateActiveSelection(String name, SubCategory category) {
+    private void Italian(int theValue) {
+        updateActiveSelection("Italian", RestaurantType.ITALIAN);
+    }
+
+    private void Asian(int theValue) {
+        updateActiveSelection("Asian", RestaurantType.ASIAN);
+    }
+
+    private void Mexican(int theValue) {
+        updateActiveSelection("Mexican", RestaurantType.MEXICAN);
+    }
+
+    private void updateActiveSelection(String name, Category category) {
 
         if (myActiveSelections.get(category) == null) {
             myActiveSelections.put(category, new LinkedList<Restaurant>());
         }
 
         if (myControls.get(Button.class, name).getBooleanValue()) {
-            System.out.println("Adding American restaurants to selection");
+            System.out.println("Adding " + name + " restaurants to selection");
             List<Restaurant> selected = mySubCategories.get(category);
             myActiveSelections.get(category).addAll(selected);
         }
         else {
-            System.out.println("Removing American restaurants from selection");
+            System.out.println("Removing " + name + " restaurants from selection");
 
             myActiveSelections.get(category).clear();
         }
     }
 
     private void preprocessInput() {
-        JSONArray rawData = loadJSONArray("yelp_restaurants_categorized4.json");
+        JSONArray rawData = loadJSONArray("yelp_restaurants_categorized_full.json");
         Set<String> seen = new HashSet<>();
 
         for (int i = 0; i < rawData.size(); i++) {

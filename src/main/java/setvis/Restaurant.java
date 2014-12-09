@@ -28,29 +28,25 @@ import de.fhpotsdam.unfolding.geo.Location;
  */
 public class Restaurant {
 
-    public static enum RestaurantType implements SubCategory {
+    public static enum RestaurantType implements Category {
         AMERICAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "cajun", "american", "hotdogs" };
             }
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getSubCategoryColor() {
                 return 0xFFF2003C;
             }
         },
         ITALIAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "italian", "pizza" };
             }
 
-            @Override
-            public Integer getColor() {
-                return 0xFFFDC086;
+            @Override public Integer getSubCategoryColor() {
+                return 0xFF984EA3;
             }
         },
         ASIAN {
@@ -61,20 +57,17 @@ public class Restaurant {
                         "vietnamese", "asianfusion" };
             }
 
-            @Override
-            public Integer getColor() {
-                return -8402561;
+            @Override public Integer getSubCategoryColor() {
+                return 0xFF4DAF4A;
             }
         },
         MEXICAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "spanish", "mexican" };
             }
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getSubCategoryColor() {
                 return -13079376;
             }
         };
@@ -92,9 +85,28 @@ public class Restaurant {
             return false;
         }
 
-        @Override
-        public String getParentCategoryDescriptor() {
+        @Override public String getCategoryDescription() {
             return "restaurant type";
+        }
+    }
+
+    public static enum RestaurantRating implements Category {
+
+        THREE {
+
+            @Override public Integer getSubCategoryColor() {
+                return 0x38D44E;
+            }
+        },
+        THREE_POINT_FIVE {
+
+            @Override public Integer getSubCategoryColor() {
+                return 0x38D44E;
+            }
+        };
+
+        @Override public String getCategoryDescription() {
+            return "rating";
         }
     }
 
