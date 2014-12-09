@@ -122,7 +122,8 @@ public class Restaurant {
         return myID.hashCode();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return myName;
     }
 

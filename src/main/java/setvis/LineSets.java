@@ -17,6 +17,7 @@
 package setvis;
 
 import controlP5.Button;
+import controlP5.ControlEvent;
 import controlP5.ControlP5;
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
@@ -26,7 +27,6 @@ import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
-import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
@@ -49,7 +49,7 @@ public class LineSets extends PApplet {
     private final Map<SubCategory, List<Restaurant>> mySubCategories =
             new HashMap<>();
 
-    private final HashMap<SubCategory, List<Restaurant>> myActiveSelections =
+    private final Map<SubCategory, List<Restaurant>> myActiveSelections =
             new HashMap<>();
 
     private ControlP5 myControls;
@@ -65,8 +65,7 @@ public class LineSets extends PApplet {
         createCategoryControlPanel();
         preprocessInput();
         populateRestaurants();
-
-        updateRestaurantOrderings();
+        computeAndUpdateRestaurantOrderings();
     }
 
     @Override public void draw() {
@@ -81,23 +80,29 @@ public class LineSets extends PApplet {
      * selected {@link SubCategory}.</p>
      */
     private void drawActiveCurves() {
-        List<Restaurant> restaurants = mySubCategories.get(RestaurantType
-                .AMERICAN);
 
-        ScreenPosition first = toScreenPosition(restaurants.get(0));
-        ScreenPosition last = toScreenPosition(restaurants.get(restaurants
-                .size() - 1));
-        beginShape();
-        strokeWeight(5);
-        noFill();
-        curveVertex(first.x, first.y);
+        for (Map.Entry<SubCategory, List<Restaurant>> e : myActiveSelections
+                .entrySet()) {
+            List<Restaurant> curRestaurants = e.getValue();
 
-        for (Restaurant r : restaurants) {
-            stroke(Restaurant.RestaurantType.AMERICAN.getColor());
-            curveVertex(toScreenPosition(r).x, toScreenPosition(r).y);
+            if (curRestaurants != null && !curRestaurants.isEmpty()) {
+                ScreenPosition first = toScreenPosition(curRestaurants.get(0));
+                ScreenPosition last = toScreenPosition(curRestaurants
+                        .get(curRestaurants.size() - 1));
+
+                beginShape();
+                strokeWeight(5);
+                noFill();
+                curveVertex(first.x, first.y);
+
+                for (Restaurant r : curRestaurants) {
+                    stroke(Restaurant.RestaurantType.AMERICAN.getColor());
+                    curveVertex(toScreenPosition(r).x, toScreenPosition(r).y);
+                }
+                curveVertex(last.x, last.y);
+                endShape();
+            }
         }
-        curveVertex(last.x, last.y);
-        endShape();
     }
 
     private ScreenPosition toScreenPosition(Restaurant e) {
@@ -126,7 +131,7 @@ public class LineSets extends PApplet {
         for (List<Restaurant> restaurants : mySubCategories.values()) {
             for (Restaurant r : restaurants) {
                 SimplePointMarker marker = new SimplePointMarker(r.getLocation());
-                marker.setColor(r.getType().getColor());
+                marker.setColor(175);
                 marker.setStrokeColor(0);
                 marker.setStrokeWeight(1);
                 myBackgroundMap.addMarker(marker);
@@ -134,7 +139,10 @@ public class LineSets extends PApplet {
         }
     }
 
-    private void updateRestaurantOrderings() {
+    /**
+     * <p>Computes a complete graph on <em>n</em> vertices </p>
+     */
+    private void computeAndUpdateRestaurantOrderings() {
         SimpleWeightedGraph<Restaurant, DefaultWeightedEdge> g =
                 new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
@@ -158,7 +166,7 @@ public class LineSets extends PApplet {
                 new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
         for (DefaultWeightedEdge e : mst.getMinimumSpanningTreeEdgeSet()) {
-            Graphs.addEdgeWithVertices(g, g.getEdgeSource(e),
+            Graphs.addEdgeWithVertices(subgraph, g.getEdgeSource(e),
                     g.getEdgeTarget(e));
         }
 
@@ -195,9 +203,9 @@ public class LineSets extends PApplet {
                 .setColorActive(RestaurantType.AMERICAN.getColor())
                 .setSwitch(true);
 
+
         Button italian = myControls.addButton("Italian");
-        italian.setValue(0)
-                .setPosition(plotX1 + 20 + 110, plotY1 + 35)
+        italian.setPosition(plotX1 + 20 + 110, plotY1 + 35)
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
@@ -205,8 +213,7 @@ public class LineSets extends PApplet {
                 .setSwitch(true);
 
         Button asian = myControls.addButton("Asian");
-        asian.setValue(0)
-                .setPosition(plotX1 + 20, plotY1 + 60)
+        asian.setPosition(plotX1 + 20, plotY1 + 60)
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
@@ -214,8 +221,7 @@ public class LineSets extends PApplet {
                 .setSwitch(true);
 
         Button mexican = myControls.addButton("Mexican");
-        mexican.setValue(0)
-                .setPosition(plotX1 + 20 + 110, plotY1 + 60)
+        mexican.setPosition(plotX1 + 20 + 110, plotY1 + 60)
                 .setSize(100, 20)
                 .setColorBackground(color(65, 65, 65))
                 .setColorForeground(color(90, 90, 90))
@@ -224,23 +230,29 @@ public class LineSets extends PApplet {
     }
 
     private void American(int theValue) {
-        System.out.println("theValue: " + theValue);
-        //updateSelection("American", Restaurant.RestaurantType.AMERICAN);
+        updateActiveSelection("American", RestaurantType.AMERICAN);
     }
 
-    /*private void updateSelection(String controllerName, SubCategory category) {
-        if ( ((Button) myControls.controller(controllerName)).isOn()) {
+    private void updateActiveSelection(String name, SubCategory category) {
+
+        if (myActiveSelections.get(category) == null) {
+            myActiveSelections.put(category, new LinkedList<Restaurant>());
+        }
+
+        if (myControls.get(Button.class, name).getBooleanValue()) {
+            System.out.println("Adding American restaurants to selection");
             List<Restaurant> selected = mySubCategories.get(category);
             myActiveSelections.get(category).addAll(selected);
         }
         else {
+            System.out.println("Removing American restaurants from selection");
+
             myActiveSelections.get(category).clear();
         }
-    }*/
+    }
 
     private void preprocessInput() {
-        JSONArray rawData =
-                loadJSONArray("yelp_restaurants_categorized_test.json");
+        JSONArray rawData = loadJSONArray("yelp_restaurants_categorized4.json");
         Set<String> seen = new HashSet<>();
 
         for (int i = 0; i < rawData.size(); i++) {
