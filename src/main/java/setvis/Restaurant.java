@@ -31,21 +31,25 @@ public class Restaurant {
     public static enum RestaurantType implements Category {
         AMERICAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "cajun", "american", "hotdogs" };
             }
 
-            @Override public Integer getSubCategoryColor() {
+            @Override
+            public Integer getSubCategoryColor() {
                 return 0xFFF2003C;
             }
         },
         ITALIAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "italian", "pizza" };
             }
 
-            @Override public Integer getSubCategoryColor() {
+            @Override
+            public Integer getSubCategoryColor() {
                 return 0xFF984EA3;
             }
         },
@@ -57,17 +61,20 @@ public class Restaurant {
                         "vietnamese", "asianfusion" };
             }
 
-            @Override public Integer getSubCategoryColor() {
+            @Override
+            public Integer getSubCategoryColor() {
                 return 0xFF4DAF4A;
             }
         },
         MEXICAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "spanish", "mexican" };
             }
 
-            @Override public Integer getSubCategoryColor() {
+            @Override
+            public Integer getSubCategoryColor() {
                 return -13079376;
             }
         };
@@ -85,7 +92,8 @@ public class Restaurant {
             return false;
         }
 
-        @Override public String getCategoryDescription() {
+        @Override
+        public String getCategoryDescription() {
             return "restaurant type";
         }
     }
@@ -94,18 +102,60 @@ public class Restaurant {
 
         THREE {
 
-            @Override public Integer getSubCategoryColor() {
-                return 0x38D44E;
+            @Override
+            public Integer getSubCategoryColor() {
+                return 0xFF38D44E;
+            }
+
+            @Override
+            public double getNumericRepresentation() {
+                return 3.0;
             }
         },
         THREE_POINT_FIVE {
 
-            @Override public Integer getSubCategoryColor() {
+            @Override
+            public Integer getSubCategoryColor() {
+                return 0xFF38D44E;
+            }
+
+            @Override
+            public double getNumericRepresentation() {
+                return 3.5;
+            }
+
+        },
+        FOUR {
+
+            //TODO
+            @Override
+            public Integer getSubCategoryColor() {
                 return 0x38D44E;
+            }
+
+            @Override
+            public double getNumericRepresentation() {
+                return 4.0;
+            }
+        },
+        FOUR_POINT_FIVE {
+
+            //TODO
+            @Override
+            public Integer getSubCategoryColor() {
+                return 0xFF38D44E;
+            }
+
+            @Override
+            public double getNumericRepresentation() {
+                return 4.5;
             }
         };
 
-        @Override public String getCategoryDescription() {
+        public abstract double getNumericRepresentation();
+
+        @Override
+        public String getCategoryDescription() {
             return "rating";
         }
     }
@@ -154,6 +204,7 @@ public class Restaurant {
         private Location myLocation;
 
         private RestaurantType myType;
+        private RestaurantRating myRating;
 
         public RestaurantBuilder(String name) {
             myName = name;
@@ -175,6 +226,31 @@ public class Restaurant {
 
         public RestaurantBuilder type(RestaurantType type) {
             myType = type;
+            return this;
+        }
+
+        public RestaurantBuilder rating(RestaurantRating rating) {
+            myRating = rating;
+            return this;
+        }
+
+        public RestaurantBuilder rating(double rating) {
+            if (rating == 3.0) {
+                myRating = RestaurantRating.THREE;
+            }
+            else if (rating == 3.5) {
+                myRating = RestaurantRating.THREE_POINT_FIVE;
+            }
+            else if (rating == 4.0) {
+                myRating = RestaurantRating.FOUR;
+            }
+            else if (rating == 4.5) {
+                myRating = RestaurantRating.FOUR_POINT_FIVE;
+            }
+            else {
+                throw new IllegalArgumentException("Unknown rating: " + rating
+                        + ". Use the range 3.0 - 4.5 with increments of .5.");
+            }
             return this;
         }
 

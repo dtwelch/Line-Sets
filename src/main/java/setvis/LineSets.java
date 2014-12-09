@@ -24,6 +24,7 @@ import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import org.jgrapht.Graphs;
+import org.jgrapht.alg.HamiltonianCycle;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -32,7 +33,9 @@ import processing.core.PApplet;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 import setvis.Restaurant.RestaurantType;
+import setvis.Restaurant.RestaurantRating;
 import setvis.Restaurant.RestaurantBuilder;
+import setvis.gui.Gui;
 
 import java.util.*;
 
@@ -60,7 +63,7 @@ public class LineSets extends PApplet {
         plotX1 = 0; plotY1 = 0; plotX2 = width; plotY2 = 60;
 
         createMapBackground();
-        createCategoryControlPanel();
+        createCategoryControlPanels();
         preprocessInput();
         computeAndUpdateRestaurantOrderings();
     }
@@ -71,7 +74,6 @@ public class LineSets extends PApplet {
 
         drawRestaurantMarkers();
         drawCategoryPanels();
-
     }
 
     /**
@@ -120,10 +122,7 @@ public class LineSets extends PApplet {
      * panning boundaries for the background citymap.</p>
      */
     private void createMapBackground() {
-        myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider
-                ());
-        //myBackgroundMap = new UnfoldingMap(this, new
-        //MapBox.LacquerProvider());
+        myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
         myBackgroundMap.zoomAndPanTo(12, new Location(47.626, -122.337));
         myBackgroundMap.zoomToLevel(13);
         myBackgroundMap.setBackgroundColor(0);
@@ -170,6 +169,13 @@ public class LineSets extends PApplet {
             }
         }
 
+        /*List<Restaurant> ordering =
+                HamiltonianCycle.getApproximateOptimalForCompleteGraph(g);
+
+        for (Restaurant r : ordering) {
+            mySubCategories.get(category).add(r);
+        }*/
+
         KruskalMinimumSpanningTree<Restaurant, DefaultWeightedEdge> mst =
                 new KruskalMinimumSpanningTree<>(g);
 
@@ -192,54 +198,37 @@ public class LineSets extends PApplet {
     }
 
     private void drawCategoryPanels() {
+        textFont(createFont("Helvetica-Bold", 12));
         noStroke();
+
         fill(130, 130, 130, 210);
         rect(plotX1 + 10, plotY1 + 10, 230, plotY2 + 20, 6);
-
-        textFont(createFont("Helvetica-Bold", 12));
-        fill(255);
+        fill(240);
         text("RESTAURANT TYPE", plotX1 + 17, plotY1 + 25);
+
+        fill(130, 130, 130, 210);
+        rect(plotX1 + 250, plotY1 + 10, 130, plotY2 - 5, 6);
+        fill(240);
+        text("RATING", plotX1 + 255, plotY1 + 25);
+
+        fill(130, 130, 130, 210);
+        rect(plotX1 + 390, plotY1 + 10, 130, plotY2 - 5, 6);
+        fill(240);
+        text("PRICE", plotX1 + 395, plotY1 + 25);
     }
 
-    public void createCategoryControlPanel(){
+    public void createCategoryControlPanels(){
         myControls =
                 new ControlP5(this, createFont("Helvetica-Bold", 8));
         frameRate(25);
 
-        Button american = myControls.addButton("American");
-        american.setPosition(plotX1 + 20, plotY1 + 35)
-                .setSize(100, 20)
-                .setColorBackground(color(65, 65, 65))
-                .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.AMERICAN.getSubCategoryColor())
-                .setSwitch(true);
-
-
-        Button italian = myControls.addButton("Italian");
-        italian.setPosition(plotX1 + 20 + 110, plotY1 + 35)
-                .setSize(100, 20)
-                .setColorBackground(color(65, 65, 65))
-                .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.ITALIAN.getSubCategoryColor())
-                .setSwitch(true);
-
-        Button asian = myControls.addButton("Asian");
-        asian.setPosition(plotX1 + 20, plotY1 + 60)
-                .setSize(100, 20)
-                .setColorBackground(color(65, 65, 65))
-                .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.ASIAN.getSubCategoryColor())
-                .setSwitch(true);
-
-        Button mexican = myControls.addButton("Mexican");
-        mexican.setPosition(plotX1 + 20 + 110, plotY1 + 60)
-                .setSize(100, 20)
-                .setColorBackground(color(65, 65, 65))
-                .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.MEXICAN.getSubCategoryColor())
-                .setSwitch(true);
+        Gui.createRestaurantTypeButtons(myControls, plotX1, plotY1);
+        Gui.createRestaurantRatingButtons(myControls, plotX1, plotY1);
+        //Gui.createRestaurantPriceButtons(myControls, plotX1, plotY1);
     }
 
+
+    //Handle callbacks for each button
     private void American(int theValue) {
         updateActiveSelection("American", RestaurantType.AMERICAN);
     }
@@ -256,6 +245,9 @@ public class LineSets extends PApplet {
         updateActiveSelection("Mexican", RestaurantType.MEXICAN);
     }
 
+    //private void
+
+
     private void updateActiveSelection(String name, Category category) {
 
         if (myActiveSelections.get(category) == null) {
@@ -263,13 +255,10 @@ public class LineSets extends PApplet {
         }
 
         if (myControls.get(Button.class, name).getBooleanValue()) {
-            System.out.println("Adding " + name + " restaurants to selection");
             List<Restaurant> selected = mySubCategories.get(category);
             myActiveSelections.get(category).addAll(selected);
         }
         else {
-            System.out.println("Removing " + name + " restaurants from selection");
-
             myActiveSelections.get(category).clear();
         }
     }
@@ -289,6 +278,7 @@ public class LineSets extends PApplet {
                     new RestaurantBuilder(o.getString("name"))
                         .id(o.getString("id"))
                         .type(getType(o, o.getJSONArray("categories")))
+                        .rating(o.getDouble("rating"))
                         .location(coord.getFloat("latitude"),
                                 coord.getFloat("longitude"));
 
@@ -310,9 +300,15 @@ public class LineSets extends PApplet {
     }
 
     /**
-     * <p></p>
-     * @param entry
-     * @param categories
+     * <p>Returns the <code>RestaurantType</code> for {@link JSONObject}
+     * <code>entry</code.></p>
+     *
+     * @param entry The raw <tt>JSON</tt> object as provided by the yelp API.
+     * @param categories Different categories for <code>entry</code>.
+     *
+     * @throws IllegalStateException If <code>entry</code> has an unrecognizable
+     *      restaurant type.
+     *
      * @return
      */
     private RestaurantType getType(JSONObject entry, JSONArray categories) {
