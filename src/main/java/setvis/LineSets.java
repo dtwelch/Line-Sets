@@ -17,12 +17,12 @@
 package setvis;
 
 import controlP5.Button;
-import controlP5.ControlEvent;
 import controlP5.ControlP5;
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.Google;
+import de.fhpotsdam.unfolding.providers.MapBox;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import org.jgrapht.Graphs;
@@ -64,20 +64,21 @@ public class LineSets extends PApplet {
         createMapBackground();
         createCategoryControlPanel();
         preprocessInput();
-        populateRestaurants();
         computeAndUpdateRestaurantOrderings();
     }
 
     @Override public void draw() {
         myBackgroundMap.draw();
-        drawCategoryPanels();
         drawActiveCurves();
+
+        drawRestaurantMarkers();
+        drawCategoryPanels();
 
     }
 
     /**
-     * <p>Draws a smooth curves through all points within each currently
-     * selected {@link SubCategory}.</p>
+     * <p>Draws a smooth curve through every point in each of the subcategories
+     * selected -- maintained by <code>myActiveSelections</code>.</p>
      */
     private void drawActiveCurves() {
 
@@ -91,13 +92,16 @@ public class LineSets extends PApplet {
                         .get(curRestaurants.size() - 1));
 
                 beginShape();
+                stroke(e.getKey().getColor());
                 strokeWeight(5);
                 noFill();
                 curveVertex(first.x, first.y);
 
                 for (Restaurant r : curRestaurants) {
-                    stroke(Restaurant.RestaurantType.AMERICAN.getColor());
-                    curveVertex(toScreenPosition(r).x, toScreenPosition(r).y);
+                    ScreenPosition curPosition = toScreenPosition(r);
+                    curveVertex(curPosition.x, curPosition.y);
+
+                    ellipse(curPosition.x, curPosition.y, 7, 7);
                 }
                 curveVertex(last.x, last.y);
                 endShape();
@@ -118,7 +122,10 @@ public class LineSets extends PApplet {
      * panning boundaries for the background citymap.</p>
      */
     private void createMapBackground() {
-        myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
+        myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider
+                ());
+        //myBackgroundMap = new UnfoldingMap(this, new
+        //MapBox.LacquerProvider());
         myBackgroundMap.zoomAndPanTo(12, new Location(47.626, -122.337));
         myBackgroundMap.zoomToLevel(13);
         myBackgroundMap.setBackgroundColor(0);
@@ -127,30 +134,36 @@ public class LineSets extends PApplet {
         myBackgroundMap.setTweening(true);
     }
 
-    private void populateRestaurants() {
+    private void drawRestaurantMarkers() {
         for (List<Restaurant> restaurants : mySubCategories.values()) {
             for (Restaurant r : restaurants) {
-                SimplePointMarker marker = new SimplePointMarker(r.getLocation());
-                marker.setColor(175);
-                marker.setStrokeColor(0);
-                marker.setStrokeWeight(1);
-                myBackgroundMap.addMarker(marker);
+                fill(175);
+                stroke(0);
+                strokeWeight(1);
+                ellipse(toScreenPosition(r).x, toScreenPosition(r).y, 7, 7);
             }
         }
     }
 
-    /**
-     * <p>Computes a complete graph on <em>n</em> vertices </p>
-     */
     private void computeAndUpdateRestaurantOrderings() {
+        for (Map.Entry<SubCategory, List<Restaurant>> e : mySubCategories
+                .entrySet()) {
+            computeAndUpdateRestaurantOrderings(e.getKey());
+        }
+    }
+
+    /**
+     * <p>Writeme.</p>
+     */
+    private void computeAndUpdateRestaurantOrderings(SubCategory category) {
         SimpleWeightedGraph<Restaurant, DefaultWeightedEdge> g =
                 new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
-        Graphs.addAllVertices(g, mySubCategories.get(RestaurantType.AMERICAN));
+        Graphs.addAllVertices(g, mySubCategories.get(category));
 
         //build a complete graph
-        for (Restaurant r : mySubCategories.get(RestaurantType.AMERICAN)) {
-            for (Restaurant e : mySubCategories.get(RestaurantType.AMERICAN)) {
+        for (Restaurant r : mySubCategories.get(category)) {
+            for (Restaurant e : mySubCategories.get(category)) {
                 if (!e.equals(r)) {
                     g.addEdge(r, e);
                     g.setEdgeWeight(g.getEdge(r, e),
@@ -173,10 +186,10 @@ public class LineSets extends PApplet {
         DepthFirstIterator<Restaurant, DefaultWeightedEdge> treeIter =
                 new DepthFirstIterator<>(subgraph);
 
-        mySubCategories.get(RestaurantType.AMERICAN).clear();
+        mySubCategories.get(category).clear();
 
         while (treeIter.hasNext()) {
-            mySubCategories.get(RestaurantType.AMERICAN).add(treeIter.next());
+            mySubCategories.get(category).add(treeIter.next());
         }
     }
 
