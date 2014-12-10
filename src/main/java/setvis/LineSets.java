@@ -1,4 +1,5 @@
-/* This file is part of 'LineSets', a final project for cpsc804: Data
+/*
+ * This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
  *
  * LineSets is free software: you can redistribute it and/or modify
@@ -19,12 +20,15 @@ package setvis;
 import controlP5.Button;
 import controlP5.ControlP5;
 import de.fhpotsdam.unfolding.UnfoldingMap;
+import de.fhpotsdam.unfolding.data.MarkerFactory;
 import de.fhpotsdam.unfolding.geo.Location;
+import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.utils.MapUtils;
+import de.fhpotsdam.unfolding.utils.ScreenPosition;
+import org.jgrapht.Graphs;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
-import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
@@ -32,7 +36,9 @@ import processing.core.PApplet;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 import setvis.Restaurant.RestaurantType;
+import setvis.Restaurant.RestaurantRating;
 import setvis.Restaurant.RestaurantBuilder;
+import setvis.gui.Gui;
 
 import java.util.*;
 
@@ -40,14 +46,17 @@ import java.util.*;
  * <p>The main driver for an interactive, lineset-based visualization of
  * restaurants in downtown Seattle.</p>
  *
- * @author Dwelch <dtw.welch@gmail.com>
+ * @author dwelch <dtw.welch@gmail.com>
 */
 public class LineSets extends PApplet {
 
-    private final Map<SubCategory, List<Restaurant>> mySubCategories =
+    private final Map<Category, List<Restaurant>> mySubCategories =
             new HashMap<>();
 
-    private final HashMap<SubCategory, List<Restaurant>> myActiveSelections =
+    private final Map<Category, List<Restaurant>> myActiveSelections =
+            new HashMap<>();
+
+    private final Map<Restaurant, RestaurantMarker> myMarkers =
             new HashMap<>();
 
     private ControlP5 myControls;
@@ -55,22 +64,56 @@ public class LineSets extends PApplet {
     private UnfoldingMap myBackgroundMap;
     private float plotX1, plotY1, plotX2, plotY2;
 
+    /**
+     * <p>Initializes all variables and objects used by the visualization.
+     * This is only executed <em>once</em>.</p>
+     */
     @Override public void setup() {
         size(700, 600);
-        plotX1 = 0; plotY1 = 0;
-        plotX2 = width; plotY2 = 60;
+        plotX1 = 0; plotY1 = 0; plotX2 = width; plotY2 = 60;
 
+        //Configures the map: chooses provider, sets panning restrictions, etc
         createMapBackground();
-        createCategoryControlPanel();
+
+        //Sets up the controlP5 buttons
+        createCategoryControlPanels();
+
+        //Parse the data and create our own Restaurant objects
         preprocessInput();
-        populateRestaurants();
-        computeRestaurantOrderings();
+
+        //Uses 2-opt TSP heuristic to find a reasonable restaurant ordering
+        computeAndUpdateRestaurantOrderings();
+
+        //Adds restaurant markers to the unfolding background map
+        createRestaurantMarkers();
     }
 
+    /**
+     * <p>The main draw 'loop'. This is executed repeatedly after
+     * {@link #setup()}.</p>
+     */
     @Override public void draw() {
         myBackgroundMap.draw();
+        drawActiveCurves();
+        drawRestaurantMarkers();    //Re-draw the markers ontop of curves
         drawCategoryPanels();
+    }
 
+    private void createRestaurantMarkers() {
+        Set<Restaurant> allRestaurants = new HashSet<>();
+        for (List<Restaurant> restaurants : mySubCategories.values()) {
+            allRestaurants.addAll(restaurants);
+        }
+
+        for (Restaurant e : allRestaurants) {
+            RestaurantMarker marker = new RestaurantMarker(e);
+            marker.setStrokeWeight(1);
+            marker.setRadius(7);
+            marker.setColor(175);
+            marker.setHighlightColor(0xFFF2003C);
+            myBackgroundMap.addMarker(marker);
+            myMarkers.put(e, marker);
+        }
     }
 
     /**
@@ -87,30 +130,81 @@ public class LineSets extends PApplet {
         myBackgroundMap.setTweening(true);
     }
 
-    private void populateRestaurants() {
-        for (List<Restaurant> restaurants : mySubCategories.values()) {
-            for (Restaurant r : restaurants) {
-                SimplePointMarker marker = new SimplePointMarker(r.getLocation());
-                marker.setColor(r.getType().getColor());
-                marker.setStrokeColor(0);
-                marker.setStrokeWeight(1);
-                myBackgroundMap.addMarker(marker);
+    private void drawRestaurantMarkers() {
+        for (Marker m : myBackgroundMap.getMarkers()) {
+            m.draw(myBackgroundMap);
+        }
+    }
+
+    public void mouseMoved() {
+        for (Marker marker : myBackgroundMap.getMarkers()) {
+            marker.setSelected(false);
+        }
+
+        Marker marker = myBackgroundMap.getFirstHitMarker(mouseX, mouseY);
+        if (marker != null) {
+            marker.setSelected(true);
+        }
+    }
+
+    /**
+     * <p>Draws a smooth curve through all points in the subcategories
+     * maintained by <code>myActiveSelections</code>.</p>
+     */
+    private void drawActiveCurves() {
+
+        for (Map.Entry<Category, List<Restaurant>> e : myActiveSelections
+                .entrySet()) {
+            List<Restaurant> curRestaurants = e.getValue();
+
+            if (curRestaurants != null && !curRestaurants.isEmpty()) {
+                ScreenPosition first = toScreenPosition(curRestaurants.get(0));
+                ScreenPosition last = toScreenPosition(curRestaurants
+                        .get(curRestaurants.size() - 1));
+
+                beginShape();
+                noFill();
+                stroke(e.getKey().getColor());
+                strokeWeight(7);
+                curveVertex(first.x, first.y);
+
+                for (Restaurant r : curRestaurants) {
+                    curveVertex(toScreenPosition(r).x, toScreenPosition(r).y);
+                }
+                curveVertex(last.x, last.y);
+                endShape();
             }
         }
     }
 
-    private void computeRestaurantOrderings() {
+    private ScreenPosition toScreenPosition(Restaurant e) {
+        return toScreenPosition(e.getLocation());
+    }
+
+    private ScreenPosition toScreenPosition(Location l) {
+        return myBackgroundMap.getScreenPosition(l);
+    }
+
+    /**
+     * <p>Computes for each category a 2-opt ordering of its contained
+     * {@link Restaurant}s.</p>
+     */
+    private void computeAndUpdateRestaurantOrderings() {
+        for (Map.Entry<Category, List<Restaurant>> e : mySubCategories
+                .entrySet()) {
+            computeAndUpdateRestaurantOrderings(e.getKey());
+        }
+    }
+
+    private void computeAndUpdateRestaurantOrderings(Category category) {
         SimpleWeightedGraph<Restaurant, DefaultWeightedEdge> g =
                 new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
-        //populate vertices
-        for (Restaurant r : mySubCategories.get(RestaurantType.AMERICAN)) {
-            g.addVertex(r);
-        }
+        Graphs.addAllVertices(g, mySubCategories.get(category));
 
         //build a complete graph
-        for (Restaurant r : mySubCategories.get(RestaurantType.AMERICAN)) {
-            for (Restaurant e : mySubCategories.get(RestaurantType.AMERICAN)) {
+        for (Restaurant r : mySubCategories.get(category)) {
+            for (Restaurant e : mySubCategories.get(category)) {
                 if (!e.equals(r)) {
                     g.addEdge(r, e);
                     g.setEdgeWeight(g.getEdge(r, e),
@@ -118,7 +212,6 @@ public class LineSets extends PApplet {
                 }
             }
         }
-
         KruskalMinimumSpanningTree<Restaurant, DefaultWeightedEdge> mst =
                 new KruskalMinimumSpanningTree<>(g);
 
@@ -126,91 +219,109 @@ public class LineSets extends PApplet {
                 new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
         for (DefaultWeightedEdge e : mst.getMinimumSpanningTreeEdgeSet()) {
-            Restaurant u = g.getEdgeSource(e);
-            Restaurant v = g.getEdgeTarget(e);
-            subgraph.addVertex(u);
-            subgraph.addVertex(v);
-            subgraph.addEdge(u, v, e);
+            Graphs.addEdgeWithVertices(subgraph, g.getEdgeSource(e),
+                    g.getEdgeTarget(e));
         }
 
         DepthFirstIterator<Restaurant, DefaultWeightedEdge> treeIter =
                 new DepthFirstIterator<>(subgraph);
 
-        mySubCategories.get(RestaurantType.AMERICAN).clear();
+        mySubCategories.get(category).clear();
+
         while (treeIter.hasNext()) {
-            mySubCategories.get(RestaurantType.AMERICAN).add(treeIter.next());
+            mySubCategories.get(category).add(treeIter.next());
         }
     }
 
     private void drawCategoryPanels() {
+        textFont(createFont("Helvetica-Bold", 12));
         noStroke();
+
         fill(130, 130, 130, 210);
         rect(plotX1 + 10, plotY1 + 10, 230, plotY2 + 20, 6);
+        fill(240);
+        text("Restaurant Type", plotX1 + 17, plotY1 + 25);
 
-        textFont(createFont("Helvetica-Bold", 12));
-        fill(255);
-        text("RESTAURANT TYPE", plotX1 + 17, plotY1 + 25);
+        fill(130, 130, 130, 210);
+        rect(plotX1 + 250, plotY1 + 10, 130, plotY2 - 5, 6);
+        fill(240);
+        text("Rating", plotX1 + 255, plotY1 + 25);
+
+        fill(130, 130, 130, 210);
+        rect(plotX1 + 390, plotY1 + 10, 130, plotY2 - 5, 6);
+        fill(240);
+        text("Review Count", plotX1 + 395, plotY1 + 25);
     }
 
-    public void createCategoryControlPanel(){
+    public void createCategoryControlPanels(){
         myControls =
                 new ControlP5(this, createFont("Helvetica-Bold", 8));
         frameRate(25);
 
-        Button american = myControls.addButton("American");
-        american.setPosition(plotX1 + 20, plotY1 + 35)
-                .setSize(100, 20)
-                .setColorBackground(color(65, 65, 65))
-                .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.AMERICAN.getColor())
-                .setSwitch(true);
-
-        Button italian = myControls.addButton("Italian");
-        italian.setValue(0)
-                .setPosition(plotX1 + 20 + 110, plotY1 + 35)
-                .setSize(100, 20)
-                .setColorBackground(color(65, 65, 65))
-                .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.ITALIAN.getColor())
-                .setSwitch(true);
-
-        Button asian = myControls.addButton("Asian");
-        asian.setValue(0)
-                .setPosition(plotX1 + 20, plotY1 + 60)
-                .setSize(100, 20)
-                .setColorBackground(color(65, 65, 65))
-                .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.ASIAN.getColor())
-                .setSwitch(true);
-
-        Button mexican = myControls.addButton("Mexican");
-        mexican.setValue(0)
-                .setPosition(plotX1 + 20 + 110, plotY1 + 60)
-                .setSize(100, 20)
-                .setColorBackground(color(65, 65, 65))
-                .setColorForeground(color(90, 90, 90))
-                .setColorActive(RestaurantType.MEXICAN.getColor())
-                .setSwitch(true);
+        Gui.createRestaurantTypeButtons(myControls, plotX1, plotY1);
+        Gui.createRestaurantRatingButtons(myControls, plotX1, plotY1);
+        //Gui.createRestaurantPriceButtons(myControls, plotX1, plotY1);
     }
 
-    private void American(int theValue) {
-        System.out.println("theValue: " + theValue);
-        //updateSelection("American", Restaurant.RestaurantType.AMERICAN);
+    //TODO: The following methods should really go in some kind of dedicated,
+    //self contained listener class.
+    private void american(int theValue) {
+        updateActiveSelection("american", RestaurantType.AMERICAN);
     }
 
-    /*private void updateSelection(String controllerName, SubCategory category) {
-        if ( ((Button) myControls.controller(controllerName)).isOn()) {
+    private void italian(int theValue) {
+        updateActiveSelection("italian", RestaurantType.ITALIAN);
+    }
+
+    private void asian(int theValue) {
+        updateActiveSelection("asian", RestaurantType.ASIAN);
+    }
+
+    private void mexican(int theValue) {
+        updateActiveSelection("mexican", RestaurantType.MEXICAN);
+    }
+
+    private void three(int theValue) {
+        updateActiveSelection("three", RestaurantRating.THREE);
+    }
+
+    private void threePointFive(int theValue) {
+        updateActiveSelection("threePointFive",
+                RestaurantRating.THREE_POINT_FIVE);
+    }
+
+    private void four(int theValue) {
+        updateActiveSelection("four", RestaurantRating.FOUR);
+    }
+
+    private void fourPointFive(int theValue) {
+        updateActiveSelection("fourPointFive", RestaurantRating.FOUR_POINT_FIVE);
+    }
+
+    private void updateActiveSelection(String name, Category category) {
+
+        if (myActiveSelections.get(category) == null) {
+            myActiveSelections.put(category, new LinkedList<Restaurant>());
+        }
+
+        if (myControls.get(Button.class, name).getBooleanValue()) {
             List<Restaurant> selected = mySubCategories.get(category);
             myActiveSelections.get(category).addAll(selected);
+
+            for (Restaurant e : myActiveSelections.get(category)) {
+                myMarkers.get(e).addIntersection(category);
+            }
         }
         else {
+            for (Restaurant e : myActiveSelections.get(category)) {
+                myMarkers.get(e).removeIntersection(category);
+            }
             myActiveSelections.get(category).clear();
         }
-    }*/
+    }
 
     private void preprocessInput() {
-        JSONArray rawData =
-                loadJSONArray("yelp_restaurants_categorized_test.json");
+        JSONArray rawData = loadJSONArray("yelp_restaurants_categorized_full.json");
         Set<String> seen = new HashSet<>();
 
         for (int i = 0; i < rawData.size(); i++) {
@@ -224,30 +335,47 @@ public class LineSets extends PApplet {
                     new RestaurantBuilder(o.getString("name"))
                         .id(o.getString("id"))
                         .type(getType(o, o.getJSONArray("categories")))
+                        .rating(o.getDouble("rating"))
                         .location(coord.getFloat("latitude"),
                                 coord.getFloat("longitude"));
 
-            addToAppropriateSets(restaurant.build());
+            Restaurant complete = restaurant.build();
+            addToAppropriateSets(complete, complete.getType(),
+                    complete.getRating());
         }
     }
 
     /**
-     * <p>Adds {@link Restaurant} <code>r</code> to the appropriate slot in the
-     * entry map. If <code>r</code> is the first, we initialize here.</p>
+     * <p>Adds an {@link Restaurant} <code>r</code> to the appropriate slot in
+     * the entry map. If <code>e</code> is first, initialize the slot.</p>
      *
-     * @param r An instance of {@link Restaurant}.
+     * @param e An instance of {@link Restaurant}.
      */
-    private void addToAppropriateSets(Restaurant r) {
-        if (mySubCategories.get(r.getType()) == null) {
-            mySubCategories.put(r.getType(), new LinkedList<Restaurant>());
+    private void addToAppropriateSets(Restaurant e, Category ... categories) {
+        addToAppropriateSets(e, Arrays.asList(categories));
+    }
+
+    private void addToAppropriateSets(Restaurant e, List<Category> categories) {
+        for (Category category : categories) {
+            if (mySubCategories.get(category) == null) {
+                mySubCategories.put(category, new LinkedList<Restaurant>());
+            }
+            else {
+                mySubCategories.get(category).add(e);
+            }
         }
-        mySubCategories.get(r.getType()).add(r);
     }
 
     /**
-     * <p></p>
-     * @param entry
-     * @param categories
+     * <p>Returns the <code>RestaurantType</code> for {@link JSONObject}
+     * <code>entry</code.></p>
+     *
+     * @param entry The raw <tt>JSON</tt> object as provided by the yelp API.
+     * @param categories Different categories for <code>entry</code>.
+     *
+     * @throws IllegalStateException If <code>entry</code> has an unrecognizable
+     *      restaurant type.
+     *
      * @return
      */
     private RestaurantType getType(JSONObject entry, JSONArray categories) {

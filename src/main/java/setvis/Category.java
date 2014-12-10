@@ -20,9 +20,9 @@ package setvis;
 /**
  * @author Dwelch <dtw.welch@gmail.com>
  */
-public interface SubCategory {
+public interface Category {
 
     public Integer getColor();
 
-    public String getParentCategoryDescriptor();
+    public String getCategoryDescription();
 }

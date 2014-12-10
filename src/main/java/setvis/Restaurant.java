@@ -21,14 +21,14 @@ import de.fhpotsdam.unfolding.geo.Location;
 
 /**
  * <p>A <code>Restaurant</code> encapsulates all relevant metadata pulled
- * from the original {@link processing.data.JSONObject}, as found in the
- * original <tt>yelpAPI</tt> search results.</p>
+ * from the {@link processing.data.JSONObject} given by the <tt>yelpAPI</tt>
+ * search results.</p>
  *
- * @author Dwelch <dtw.welch@gmail.com>
+ * @author dwelch <dtw.welch@gmail.com>
  */
 public class Restaurant {
 
-    public static enum RestaurantType implements SubCategory {
+    public static enum RestaurantType implements Category {
         AMERICAN {
 
             @Override
@@ -38,7 +38,7 @@ public class Restaurant {
 
             @Override
             public Integer getColor() {
-                return 0xFFF2003C;
+                return 0xFF1b9e77;
             }
         },
         ITALIAN {
@@ -50,7 +50,7 @@ public class Restaurant {
 
             @Override
             public Integer getColor() {
-                return 0xFFFDC086;
+                return 0xFFF2003C;
             }
         },
         ASIAN {
@@ -63,7 +63,7 @@ public class Restaurant {
 
             @Override
             public Integer getColor() {
-                return -8402561;
+                return 0xFF1f78b4;
             }
         },
         MEXICAN {
@@ -75,7 +75,7 @@ public class Restaurant {
 
             @Override
             public Integer getColor() {
-                return -13079376;
+                return 0xFFb2df8a;
             }
         };
 
@@ -93,8 +93,66 @@ public class Restaurant {
         }
 
         @Override
-        public String getParentCategoryDescriptor() {
+        public String getCategoryDescription() {
             return "restaurant type";
+        }
+    }
+
+    public static enum RestaurantRating implements Category {
+
+        THREE {
+
+            @Override
+            public Integer getColor() {
+                return 0xFFfb9a99;
+            }
+        },
+        THREE_POINT_FIVE {
+
+            @Override
+            public Integer getColor() {
+                return 0xFFe31a1c;
+            }
+        },
+        FOUR {
+
+            @Override
+            public Integer getColor() {
+                return 0xFFfdbf6f;
+            }
+        },
+        FOUR_POINT_FIVE {
+
+            @Override
+            public Integer getColor() {
+                return 0xFFff7f00;
+            }
+        };
+
+        @Override
+        public String getCategoryDescription() {
+            return "rating";
+        }
+    }
+
+    public static enum RestaurantReviews implements Category {
+
+        FEW {
+            @Override
+            public Integer getColor() {
+                return 0xFFff7f00;
+            }
+        },
+        MANY {
+            @Override
+            public Integer getColor() {
+                return 0xFFff7f00;
+            }
+        };
+
+        @Override
+        public String getCategoryDescription() {
+            return "review count";
         }
     }
 
@@ -102,12 +160,18 @@ public class Restaurant {
     private final Location myLocation;
 
     private final RestaurantType myType;
+    private final RestaurantRating myRating;
 
     private Restaurant(RestaurantBuilder builder) {
         myName = builder.myName;
         myID = builder.myID;
         myLocation = builder.myLocation;
         myType = builder.myType;
+        myRating = builder.myRating;
+    }
+
+    public String getName() {
+        return myName;
     }
 
     public Location getLocation() {
@@ -118,15 +182,19 @@ public class Restaurant {
         return myType;
     }
 
+    public RestaurantRating getRating() {
+        return myRating;
+    }
+
     public int hashCode() {
         return myID.hashCode();
     }
 
     @Override public String toString() {
-        return myName;
+        return myName + " : " + myID;
     }
 
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         boolean result = (o instanceof Restaurant);
 
         if (result) {
@@ -141,6 +209,7 @@ public class Restaurant {
         private Location myLocation;
 
         private RestaurantType myType;
+        private RestaurantRating myRating;
 
         public RestaurantBuilder(String name) {
             myName = name;
@@ -162,6 +231,31 @@ public class Restaurant {
 
         public RestaurantBuilder type(RestaurantType type) {
             myType = type;
+            return this;
+        }
+
+        public RestaurantBuilder rating(RestaurantRating rating) {
+            myRating = rating;
+            return this;
+        }
+
+        public RestaurantBuilder rating(double rating) {
+            if (rating == 3.0) {
+                myRating = RestaurantRating.THREE;
+            }
+            else if (rating == 3.5) {
+                myRating = RestaurantRating.THREE_POINT_FIVE;
+            }
+            else if (rating == 4.0) {
+                myRating = RestaurantRating.FOUR;
+            }
+            else if (rating == 4.5) {
+                myRating = RestaurantRating.FOUR_POINT_FIVE;
+            }
+            else {
+                throw new IllegalArgumentException("Unknown rating: " + rating
+                        + ". Use the range (3.0 - 4.5) with increments of .5.");
+            }
             return this;
         }
 

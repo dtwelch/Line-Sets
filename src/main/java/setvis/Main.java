@@ -22,12 +22,12 @@ import processing.core.PApplet;
 /**
  * <p>Starts the main application.</p>
  *
- * @author Dwelch <dtw.welch@gmail.com>
+ * @author dwelch <dtw.welch@gmail.com>
  */
 public class Main {
 
     /**
-     * @param args Arguments are ignored.
+     * @param args Arguments are ignored here.
      */
     public static void main(String[] args) {
         PApplet.main("setvis.LineSets");
