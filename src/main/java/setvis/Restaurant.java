@@ -261,14 +261,13 @@ public class Restaurant {
 
         @Override
         public Restaurant build() {
-            if (myType == null) {
-                throw new IllegalStateException("Null restaurant type. All"
-                        + " restaurants must have a type.");
+            if (myType == null || myRating == null) {
+                throw new IllegalStateException("Null category.");
             }
 
             if (myLocation == null) {
                 throw new IllegalStateException("Null location. All"
-                        + " restaurants must have a valid location.");
+                        + " restaurants must have a non-null location.");
             }
             return new Restaurant(this);
         }
