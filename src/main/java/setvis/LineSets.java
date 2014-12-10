@@ -19,8 +19,10 @@ package setvis;
 import controlP5.Button;
 import controlP5.ControlP5;
 import de.fhpotsdam.unfolding.UnfoldingMap;
+import de.fhpotsdam.unfolding.data.MarkerFactory;
 import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.Marker;
+import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
@@ -53,7 +55,10 @@ public class LineSets extends PApplet {
     private final Map<Category, List<Restaurant>> myActiveSelections =
             new HashMap<>();
 
-    private final Map<Restaurant, List<Category>> myIntersectCategories =
+    private final Map<Restaurant, Set<Category>> myIntersectCategories =
+            new HashMap<>();
+
+    private final Map<Restaurant, RestaurantMarker> myMarkers =
             new HashMap<>();
 
     private ControlP5 myControls;
@@ -66,6 +71,7 @@ public class LineSets extends PApplet {
         plotX1 = 0; plotY1 = 0; plotX2 = width; plotY2 = 60;
 
         createMapBackground();
+
         createCategoryControlPanels();
         preprocessInput();
         computeAndUpdateRestaurantOrderings();
@@ -73,22 +79,26 @@ public class LineSets extends PApplet {
     }
 
     private void createRestaurantMarkers() {
+        Set<Restaurant> allRestaurants = new HashSet<>();
         for (List<Restaurant> restaurants : mySubCategories.values()) {
-            for (Restaurant e : restaurants) {
-                RestaurantMarker marker = new RestaurantMarker(e);
-                myBackgroundMap.addMarker(marker);
-            }
+            allRestaurants.addAll(restaurants);
+        }
+
+        for (Restaurant e : allRestaurants) {
+            RestaurantMarker marker = new RestaurantMarker(e);
+            marker.setStrokeWeight(1);
+            marker.setRadius(7);
+            marker.setColor(175);
+            marker.setHighlightColor(0xFFF2003C);
+            myBackgroundMap.addMarker(marker);
         }
     }
-
 
     @Override public void draw() {
         myBackgroundMap.draw();
 
         drawActiveCurves();
         drawRestaurantMarkers();
-
-        //drawActiveRestaurantMarkers();
 
         drawActiveCurveIntersections();
 
@@ -105,7 +115,7 @@ public class LineSets extends PApplet {
     private void drawActiveCurveIntersections() {
         for (Restaurant e : findActiveIntersections()) {
             drawConcentricIntersectGlyph(e);
-            //drawRestaurantMarker(e);    //maybe helps with occulsion?
+            //drawRestaurantMarkers(); //maybe helps with occulsion?
         }
     }
 
@@ -124,26 +134,11 @@ public class LineSets extends PApplet {
         //System.out.println("---");
     }
 
-    private void drawRestaurantMarker(Restaurant e) {
-
-        //RestaurantMarker marker = new RestaurantMarker(e);
-       // myBackgroundMap.addMarker(marker);
-        fill(175);
-        stroke(0);
-        strokeWeight(1);
-        ellipse(toScreenPosition(e).x, toScreenPosition(e).y, 7, 7);
-        noFill();
-    }
-
     public void mouseMoved() {
-        // Deselect all marker
         for (Marker marker : myBackgroundMap.getMarkers()) {
             marker.setSelected(false);
-           // marker.getProperties().put()
         }
 
-        // Select hit marker
-        // Note: Use getHitMarkers(x, y) if you want to allow multiple selection.
         Marker marker = myBackgroundMap.getFirstHitMarker(mouseX, mouseY);
         if (marker != null) {
             marker.setSelected(true);
@@ -183,7 +178,7 @@ public class LineSets extends PApplet {
     }
 
     private void clearIntersectCategoryMap() {
-        for (Map.Entry<Restaurant, List<Category>> entry :
+        for (Map.Entry<Restaurant, Set<Category>> entry :
                 myIntersectCategories.entrySet()) {
             if (entry.getValue() != null) {
                 entry.getValue().clear();
@@ -191,9 +186,10 @@ public class LineSets extends PApplet {
         }
     }
 
+    //generalize this with the other method that adds to the subcategory map..
     private void addToIntersectCategoryMap(Restaurant e, Category category) {
         if (myIntersectCategories.get(e) == null) {
-            myIntersectCategories.put(e, new LinkedList<Category>());
+            myIntersectCategories.put(e, new LinkedHashSet<Category>());
         } else {
             myIntersectCategories.get(e).add(category);
         }

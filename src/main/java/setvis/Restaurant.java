@@ -161,6 +161,10 @@ public class Restaurant {
         return myType;
     }
 
+    public String getId() {
+        return myID;
+    }
+
     public RestaurantRating getRating() {
         return myRating;
     }

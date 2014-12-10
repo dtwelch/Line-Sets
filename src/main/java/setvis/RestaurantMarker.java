@@ -16,21 +16,27 @@
  */
 package setvis;
 
-import de.fhpotsdam.unfolding.marker.SimplePointMarker;
-import processing.core.PFont;
-import processing.core.PGraphics;
+import de.fhpotsdam.unfolding.marker.*;
+import de.fhpotsdam.unfolding.geo.*;
+import processing.core.*;
 
+/**
+ * A point marker which can show a label containing the marker's name.
+ */
 public class RestaurantMarker extends SimplePointMarker {
 
-    protected String myTitle;
+    protected String myName;
     protected int space = 10;
 
-    private PFont font;
     private float fontSize = 12;
 
     public RestaurantMarker(Restaurant restaurant) {
-        this.location = restaurant.getLocation();
-        myTitle = restaurant.getName();
+        this(restaurant.getLocation(), restaurant.getName());
+    }
+
+    public RestaurantMarker(Location location, String name) {
+        this.location = location;
+        myName = name;
     }
 
     /**
@@ -40,39 +46,36 @@ public class RestaurantMarker extends SimplePointMarker {
         pg.pushStyle();
         pg.pushMatrix();
 
-        if (!this.isHidden()) {
-            if (selected) {
-                pg.translate(0, 0);
-            }
-            pg.strokeWeight(strokeWeight);
-            if (selected) {
-                pg.fill(highlightColor);
-                pg.stroke(highlightStrokeColor);
-            } else {
-                pg.fill(color);
-                pg.stroke(strokeColor);
-            }
-            pg.ellipse(x, y, 7, 7);
+        if (selected) {
+            pg.translate(0, 0);
         }
-        // label
-        if (selected && myTitle != null) {
-            if (font != null) {
-                pg.textFont(font);
-            }
+
+        pg.strokeWeight(strokeWeight);
+        if (selected) {
             pg.fill(highlightColor);
             pg.stroke(highlightStrokeColor);
-            pg.rect(x + strokeWeight / 2, y - fontSize + strokeWeight / 2 -
-                            space, pg.textWidth(myTitle) + space * 1.5f,
+        } else {
+            pg.fill(color);
+            pg.stroke(strokeColor);
+        }
+        pg.ellipse(x, y, 7, 7);// TODO use radius in km and convert to px
+
+        // label
+        if (selected && myName != null) {
+            pg.fill(highlightColor);
+            pg.stroke(highlightStrokeColor);
+            pg.rect(x + strokeWeight / 2, y - fontSize + strokeWeight / 2 - space,
+                    pg.textWidth(myName) + space * 1.5f,
                     fontSize + space);
             pg.fill(255, 255, 255);
-            pg.text(myTitle, Math.round(x + space * 0.75f + strokeWeight / 2),
+            pg.text(myName, Math.round(x + space * 0.75f + strokeWeight / 2),
                     Math.round(y + strokeWeight / 2 - space * 0.75f));
         }
         pg.popMatrix();
         pg.popStyle();
     }
 
-    public String getTitle() {
-        return myTitle;
+    public String getName() {
+        return myName;
     }
 }
