@@ -88,7 +88,7 @@ public class LineSets extends PApplet {
         drawActiveCurves();
         drawRestaurantMarkers();
 
-        // drawActiveRestaurantMarkers();
+        //drawActiveRestaurantMarkers();
 
         drawActiveCurveIntersections();
 
@@ -122,18 +122,6 @@ public class LineSets extends PApplet {
             ringSize += 11;
         }
         //System.out.println("---");
-    }
-
-    private void drawAllRestaurantMarkers() {
-        for (List<Restaurant> restaurants : mySubCategories.values()) {
-            for (Restaurant e : restaurants) { drawRestaurantMarker(e); }
-        }
-    }
-
-    private void drawActiveRestaurantMarkers() {
-        for (List<Restaurant> restaurants : myActiveSelections.values()) {
-            for (Restaurant e : restaurants) { drawRestaurantMarker(e); }
-        }
     }
 
     private void drawRestaurantMarker(Restaurant e) {

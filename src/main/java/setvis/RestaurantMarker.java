@@ -23,7 +23,6 @@ import processing.core.PGraphics;
 public class RestaurantMarker extends SimplePointMarker {
 
     protected String myTitle;
-    protected float size = 15;
     protected int space = 10;
 
     private PFont font;
@@ -53,7 +52,7 @@ public class RestaurantMarker extends SimplePointMarker {
                 pg.fill(color);
                 pg.stroke(strokeColor);
             }
-            pg.ellipse(x, y, size, size);// TODO use radius in km and convert to px
+            pg.ellipse(x, y, 7, 7);
         }
         // label
         if (selected && myTitle != null) {
