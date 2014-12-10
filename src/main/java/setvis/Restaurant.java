@@ -50,7 +50,7 @@ public class Restaurant {
 
             @Override
             public Integer getColor() {
-                return 0xFFa6cee3;
+                return 0xFFF2003C;
             }
         },
         ASIAN {
@@ -147,6 +147,10 @@ public class Restaurant {
         myLocation = builder.myLocation;
         myType = builder.myType;
         myRating = builder.myRating;
+    }
+
+    public String getName() {
+        return myName;
     }
 
     public Location getLocation() {

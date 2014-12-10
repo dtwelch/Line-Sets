@@ -20,17 +20,16 @@ import controlP5.Button;
 import controlP5.ControlP5;
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
+import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.HamiltonianCycle;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import processing.core.PApplet;
-import processing.core.PShape;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 import setvis.Restaurant.RestaurantType;
@@ -70,14 +69,26 @@ public class LineSets extends PApplet {
         createCategoryControlPanels();
         preprocessInput();
         computeAndUpdateRestaurantOrderings();
+        createRestaurantMarkers();
     }
+
+    private void createRestaurantMarkers() {
+        for (List<Restaurant> restaurants : mySubCategories.values()) {
+            for (Restaurant e : restaurants) {
+                RestaurantMarker marker = new RestaurantMarker(e);
+                myBackgroundMap.addMarker(marker);
+            }
+        }
+    }
+
 
     @Override public void draw() {
         myBackgroundMap.draw();
 
-        drawAllRestaurantMarkers();
         drawActiveCurves();
-        drawActiveRestaurantMarkers();
+        drawRestaurantMarkers();
+
+        // drawActiveRestaurantMarkers();
 
         drawActiveCurveIntersections();
 
@@ -85,10 +96,16 @@ public class LineSets extends PApplet {
         clearIntersectCategoryMap();
     }
 
+    private void drawRestaurantMarkers() {
+        for (Marker m : myBackgroundMap.getMarkers()) {
+            m.draw(myBackgroundMap);
+        }
+    }
+
     private void drawActiveCurveIntersections() {
         for (Restaurant e : findActiveIntersections()) {
             drawConcentricIntersectGlyph(e);
-            drawRestaurantMarker(e);    //maybe helps with occulsion?
+            //drawRestaurantMarker(e);    //maybe helps with occulsion?
         }
     }
 
@@ -120,11 +137,29 @@ public class LineSets extends PApplet {
     }
 
     private void drawRestaurantMarker(Restaurant e) {
+
+        //RestaurantMarker marker = new RestaurantMarker(e);
+       // myBackgroundMap.addMarker(marker);
         fill(175);
         stroke(0);
         strokeWeight(1);
         ellipse(toScreenPosition(e).x, toScreenPosition(e).y, 7, 7);
         noFill();
+    }
+
+    public void mouseMoved() {
+        // Deselect all marker
+        for (Marker marker : myBackgroundMap.getMarkers()) {
+            marker.setSelected(false);
+           // marker.getProperties().put()
+        }
+
+        // Select hit marker
+        // Note: Use getHitMarkers(x, y) if you want to allow multiple selection.
+        Marker marker = myBackgroundMap.getFirstHitMarker(mouseX, mouseY);
+        if (marker != null) {
+            marker.setSelected(true);
+        }
     }
 
     private Set<Restaurant> findActiveIntersections() {
@@ -292,17 +327,17 @@ public class LineSets extends PApplet {
         fill(130, 130, 130, 210);
         rect(plotX1 + 10, plotY1 + 10, 230, plotY2 + 20, 6);
         fill(240);
-        text("RESTAURANT TYPE", plotX1 + 17, plotY1 + 25);
+        text("Restaurant Type", plotX1 + 17, plotY1 + 25);
 
         fill(130, 130, 130, 210);
         rect(plotX1 + 250, plotY1 + 10, 130, plotY2 - 5, 6);
         fill(240);
-        text("RATING", plotX1 + 255, plotY1 + 25);
+        text("Rating", plotX1 + 255, plotY1 + 25);
 
         fill(130, 130, 130, 210);
         rect(plotX1 + 390, plotY1 + 10, 130, plotY2 - 5, 6);
         fill(240);
-        text("PRICE", plotX1 + 395, plotY1 + 25);
+        text("Price", plotX1 + 395, plotY1 + 25);
     }
 
     public void createCategoryControlPanels(){
