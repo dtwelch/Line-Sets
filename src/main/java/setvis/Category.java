@@ -1,5 +1,4 @@
-/*
- * This file is part of 'LineSets', a final project for cpsc804: Data
+/* This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
  * 
  * LineSets is free software: you can redistribute it and/or modify
@@ -22,7 +21,7 @@ package setvis;
  */
 public interface Category {
 
-    public Integer getSubCategoryColor();
+    public Integer getColor();
 
     public String getCategoryDescription();
 }

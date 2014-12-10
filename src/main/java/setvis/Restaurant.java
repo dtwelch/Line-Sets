@@ -1,5 +1,4 @@
-/*
- * This file is part of 'LineSets', a final project for cpsc804: Data
+/* This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
  * 
  * LineSets is free software: you can redistribute it and/or modify
@@ -21,60 +20,52 @@ import de.fhpotsdam.unfolding.geo.Location;
 
 /**
  * <p>A <code>Restaurant</code> encapsulates all relevant metadata pulled
- * from the original {@link processing.data.JSONObject}, as found in the
- * original <tt>yelpAPI</tt> search results.</p>
+ * from the {@link processing.data.JSONObject} given by the <tt>yelpAPI</tt>
+ * search results.</p>
  *
- * @author Dwelch <dtw.welch@gmail.com>
+ * @author dwelch <dtw.welch@gmail.com>
  */
 public class Restaurant {
 
     public static enum RestaurantType implements Category {
         AMERICAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "cajun", "american", "hotdogs" };
             }
 
-            @Override
-            public Integer getSubCategoryColor() {
+            @Override public Integer getColor() {
                 return 0xFFF2003C;
             }
         },
         ITALIAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "italian", "pizza" };
             }
 
-            @Override
-            public Integer getSubCategoryColor() {
+            @Override public Integer getColor() {
                 return 0xFF984EA3;
             }
         },
         ASIAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "korean", "japanese", "chinese",
                         "vietnamese", "asianfusion" };
             }
 
-            @Override
-            public Integer getSubCategoryColor() {
+            @Override public Integer getColor() {
                 return 0xFF4DAF4A;
             }
         },
         MEXICAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "spanish", "mexican" };
             }
 
-            @Override
-            public Integer getSubCategoryColor() {
+            @Override public Integer getColor() {
                 return -13079376;
             }
         };
@@ -102,60 +93,30 @@ public class Restaurant {
 
         THREE {
 
-            @Override
-            public Integer getSubCategoryColor() {
-                return 0xFF38D44E;
-            }
-
-            @Override
-            public double getNumericRepresentation() {
-                return 3.0;
+            @Override public Integer getColor() {
+                return 0xFFBF5B17;
             }
         },
         THREE_POINT_FIVE {
 
-            @Override
-            public Integer getSubCategoryColor() {
+            @Override public Integer getColor() {
                 return 0xFF38D44E;
             }
-
-            @Override
-            public double getNumericRepresentation() {
-                return 3.5;
-            }
-
         },
         FOUR {
 
-            //TODO
-            @Override
-            public Integer getSubCategoryColor() {
+            @Override public Integer getColor() {
                 return 0x38D44E;
-            }
-
-            @Override
-            public double getNumericRepresentation() {
-                return 4.0;
             }
         },
         FOUR_POINT_FIVE {
 
-            //TODO
-            @Override
-            public Integer getSubCategoryColor() {
+            @Override public Integer getColor() {
                 return 0xFF38D44E;
-            }
-
-            @Override
-            public double getNumericRepresentation() {
-                return 4.5;
             }
         };
 
-        public abstract double getNumericRepresentation();
-
-        @Override
-        public String getCategoryDescription() {
+        @Override public String getCategoryDescription() {
             return "rating";
         }
     }
@@ -164,12 +125,14 @@ public class Restaurant {
     private final Location myLocation;
 
     private final RestaurantType myType;
+    private final RestaurantRating myRating;
 
     private Restaurant(RestaurantBuilder builder) {
         myName = builder.myName;
         myID = builder.myID;
         myLocation = builder.myLocation;
         myType = builder.myType;
+        myRating = builder.myRating;
     }
 
     public Location getLocation() {
@@ -180,13 +143,16 @@ public class Restaurant {
         return myType;
     }
 
+    public RestaurantRating getRating() {
+        return myRating;
+    }
+
     public int hashCode() {
         return myID.hashCode();
     }
 
-    @Override
-    public String toString() {
-        return myName;
+    @Override public String toString() {
+        return myName + " : " + myID;
     }
 
     public boolean equals(Object o) {
@@ -249,13 +215,12 @@ public class Restaurant {
             }
             else {
                 throw new IllegalArgumentException("Unknown rating: " + rating
-                        + ". Use the range 3.0 - 4.5 with increments of .5.");
+                        + ". Use the range (3.0 - 4.5) with increments of .5.");
             }
             return this;
         }
 
-        @Override
-        public Restaurant build() {
+        @Override public Restaurant build() {
             if (myType == null) {
                 throw new IllegalStateException("Null restaurant type. All"
                         + " restaurants must have a type.");

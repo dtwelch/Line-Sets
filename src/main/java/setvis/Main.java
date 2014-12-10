@@ -1,5 +1,4 @@
-/*
- * This file is part of 'LineSets', a final project for cpsc804: Data
+/* This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
  * 
  * LineSets is free software: you can redistribute it and/or modify
@@ -27,7 +26,7 @@ import processing.core.PApplet;
 public class Main {
 
     /**
-     * @param args Arguments are ignored.
+     * @param args Arguments are ignored here.
      */
     public static void main(String[] args) {
         PApplet.main("setvis.LineSets");

@@ -24,7 +24,6 @@ import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import org.jgrapht.Graphs;
-import org.jgrapht.alg.HamiltonianCycle;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
@@ -43,7 +42,7 @@ import java.util.*;
  * <p>The main driver for an interactive, lineset-based visualization of
  * restaurants in downtown Seattle.</p>
  *
- * @author Dwelch <dtw.welch@gmail.com>
+ * @author dwelch <dtw.welch@gmail.com>
 */
 public class LineSets extends PApplet {
 
@@ -70,10 +69,78 @@ public class LineSets extends PApplet {
 
     @Override public void draw() {
         myBackgroundMap.draw();
-        drawActiveCurves();
 
         drawRestaurantMarkers();
+        drawActiveCurves();
+
+        drawActiveCurveIntersections();
+
         drawCategoryPanels();
+    }
+
+    private void drawActiveCurveIntersections() {
+        Set<Restaurant> intersections = findActiveIntersections();
+
+        // for each restaurant in the set of active intersections, we need
+        // to draw concentric circles
+        for (Restaurant e : intersections) {
+            noFill();
+            strokeWeight(4);
+
+           // fill(e.getType().getColor());    // the first color will always be the restaurant type.
+            stroke(e.getRating().getColor());
+            ellipse(toScreenPosition(e).x, toScreenPosition(e).y, 20, 20);
+
+           // fill(e.getRating().getColor());
+            //stroke(e.getRating().getColor());
+
+            //ellipse(toScreenPosition(e).x, toScreenPosition(e).y, 15, 15);
+
+        }
+        // for (Map.Entry<Category, List<Restaurant> entries : myActiveSelections.c>)
+    }
+
+    private void drawRestaurantMarkers() {
+        for (List<Restaurant> restaurants : mySubCategories.values()) {
+            for (Restaurant e : restaurants) {
+                drawDefaultRestaurantMarker(e);
+            }
+        }
+    }
+
+    private void drawDefaultRestaurantMarker(Restaurant e) {
+        fill(175);
+        stroke(0);
+        strokeWeight(1);
+        ellipse(toScreenPosition(e).x, toScreenPosition(e).y, 7, 7);
+        noFill();
+    }
+
+    private Set<Restaurant> findActiveIntersections() {
+
+        Set<Restaurant> allActive = new HashSet<>();
+        Set<Restaurant> activeRestaurantTypes = new HashSet<>();
+        Set<Restaurant> activeRestaurantRatings = new HashSet<>();
+        Set<Restaurant> activeRestaurantPrices = new HashSet<>();
+
+        //first compute the union of all active restaurant types.
+        //i.e. active(American) U .. U active(Mexican)
+        for (Map.Entry<Category, List<Restaurant>> entry :
+                myActiveSelections.entrySet()) {
+
+            if (entry.getKey() instanceof RestaurantType) {
+                activeRestaurantTypes.addAll(entry.getValue());
+            }
+            else if (entry.getKey() instanceof RestaurantRating) {
+                activeRestaurantRatings.addAll(entry.getValue());
+            }
+            allActive.addAll(entry.getValue());
+        }
+
+        allActive.retainAll(activeRestaurantTypes);
+        allActive.retainAll(activeRestaurantRatings);
+
+        return allActive;
     }
 
     /**
@@ -92,16 +159,17 @@ public class LineSets extends PApplet {
                         .get(curRestaurants.size() - 1));
 
                 beginShape();
-                stroke(e.getKey().getSubCategoryColor());
-                strokeWeight(6);
+                stroke(e.getKey().getColor());
+                strokeWeight(7);
                 noFill();
                 curveVertex(first.x, first.y);
 
                 for (Restaurant r : curRestaurants) {
                     ScreenPosition curPosition = toScreenPosition(r);
                     curveVertex(curPosition.x, curPosition.y);
-
-                    ellipse(curPosition.x, curPosition.y, 9, 9);
+                    noFill();
+                    strokeWeight(4);
+                    ellipse(curPosition.x, curPosition.y, 12, 12);
                 }
                 curveVertex(last.x, last.y);
                 endShape();
@@ -131,17 +199,9 @@ public class LineSets extends PApplet {
         myBackgroundMap.setTweening(true);
     }
 
-    private void drawRestaurantMarkers() {
-        for (List<Restaurant> restaurants : mySubCategories.values()) {
-            for (Restaurant r : restaurants) {
-                fill(175);
-                stroke(0);
-                strokeWeight(1);
-                ellipse(toScreenPosition(r).x, toScreenPosition(r).y, 7, 7);
-            }
-        }
-    }
-
+    /**
+     * <p></p>
+     */
     private void computeAndUpdateRestaurantOrderings() {
         for (Map.Entry<Category, List<Restaurant>> e : mySubCategories
                 .entrySet()) {
@@ -149,9 +209,6 @@ public class LineSets extends PApplet {
         }
     }
 
-    /**
-     * <p>Writeme.</p>
-     */
     private void computeAndUpdateRestaurantOrderings(Category category) {
         SimpleWeightedGraph<Restaurant, DefaultWeightedEdge> g =
                 new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
@@ -191,9 +248,18 @@ public class LineSets extends PApplet {
                 new DepthFirstIterator<>(subgraph);
 
         mySubCategories.get(category).clear();
-
+        boolean test = true;
         while (treeIter.hasNext()) {
-            mySubCategories.get(category).add(treeIter.next());
+            if (test) {
+                Restaurant first = treeIter.next();
+                System.out.println("first rest for " + category
+                        + " is: " + first);
+                mySubCategories.get(category).add(first);
+                test = false;
+            }
+            else {
+                mySubCategories.get(category).add(treeIter.next());
+            }
         }
     }
 
@@ -228,25 +294,27 @@ public class LineSets extends PApplet {
     }
 
 
-    //Handle callbacks for each button
-    private void American(int theValue) {
-        updateActiveSelection("American", RestaurantType.AMERICAN);
+    //Handle callbacks for each button, really these should probably be in a
+    //dedicated listener but eh.
+    private void american(int theValue) {
+        updateActiveSelection("american", RestaurantType.AMERICAN);
     }
 
-    private void Italian(int theValue) {
-        updateActiveSelection("Italian", RestaurantType.ITALIAN);
+    private void italian(int theValue) {
+        updateActiveSelection("italian", RestaurantType.ITALIAN);
     }
 
-    private void Asian(int theValue) {
-        updateActiveSelection("Asian", RestaurantType.ASIAN);
+    private void asian(int theValue) {
+        updateActiveSelection("asian", RestaurantType.ASIAN);
     }
 
-    private void Mexican(int theValue) {
-        updateActiveSelection("Mexican", RestaurantType.MEXICAN);
+    private void mexican(int theValue) {
+        updateActiveSelection("mexican", RestaurantType.MEXICAN);
     }
 
-    //private void
-
+    private void three(int theValue) {
+        updateActiveSelection("three", RestaurantRating.THREE);
+    }
 
     private void updateActiveSelection(String name, Category category) {
 
@@ -282,21 +350,30 @@ public class LineSets extends PApplet {
                         .location(coord.getFloat("latitude"),
                                 coord.getFloat("longitude"));
 
-            addToAppropriateSets(restaurant.build());
+            Restaurant complete = restaurant.build();
+            addToAppropriateSets(complete, complete.getType(),
+                    complete.getRating());
         }
     }
 
     /**
-     * <p>Adds {@link Restaurant} <code>r</code> to the appropriate slot in the
-     * entry map. If <code>r</code> is the first, we initialize here.</p>
+     * <p>Adds an {@link Restaurant} <code>r</code> to the appropriate slot in
+     * the entry map. If <code>e</code> is first, initialize the slot.</p>
      *
-     * @param r An instance of {@link Restaurant}.
+     * @param e An instance of {@link Restaurant}.
      */
-    private void addToAppropriateSets(Restaurant r) {
-        if (mySubCategories.get(r.getType()) == null) {
-            mySubCategories.put(r.getType(), new LinkedList<Restaurant>());
+    private void addToAppropriateSets(Restaurant e, Category ... categories) {
+        addToAppropriateSets(e, Arrays.asList(categories));
+    }
+
+    private void addToAppropriateSets(Restaurant e, List<Category> categories) {
+        for (Category category : categories) {
+            if (mySubCategories.get(category) == null) {
+                mySubCategories.put(category, new LinkedList<Restaurant>());
+            } else {
+                mySubCategories.get(category).add(e);
+            }
         }
-        mySubCategories.get(r.getType()).add(r);
     }
 
     /**
