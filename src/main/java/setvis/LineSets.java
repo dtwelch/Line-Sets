@@ -24,11 +24,13 @@ import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import org.jgrapht.Graphs;
+import org.jgrapht.alg.HamiltonianCycle;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.jgrapht.traverse.DepthFirstIterator;
 import processing.core.PApplet;
+import processing.core.PShape;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 import setvis.Restaurant.RestaurantType;
@@ -52,6 +54,9 @@ public class LineSets extends PApplet {
     private final Map<Category, List<Restaurant>> myActiveSelections =
             new HashMap<>();
 
+    private final Map<Restaurant, List<Category>> myIntersectCategories =
+            new HashMap<>();
+
     private ControlP5 myControls;
 
     private UnfoldingMap myBackgroundMap;
@@ -70,45 +75,51 @@ public class LineSets extends PApplet {
     @Override public void draw() {
         myBackgroundMap.draw();
 
-        drawRestaurantMarkers();
+        drawAllRestaurantMarkers();
         drawActiveCurves();
+        drawActiveRestaurantMarkers();
 
         drawActiveCurveIntersections();
 
         drawCategoryPanels();
+        clearIntersectCategoryMap();
     }
 
     private void drawActiveCurveIntersections() {
-        Set<Restaurant> intersections = findActiveIntersections();
-
-        // for each restaurant in the set of active intersections, we need
-        // to draw concentric circles
-        for (Restaurant e : intersections) {
-            noFill();
-            strokeWeight(4);
-
-           // fill(e.getType().getColor());    // the first color will always be the restaurant type.
-            stroke(e.getRating().getColor());
-            ellipse(toScreenPosition(e).x, toScreenPosition(e).y, 20, 20);
-
-           // fill(e.getRating().getColor());
-            //stroke(e.getRating().getColor());
-
-            //ellipse(toScreenPosition(e).x, toScreenPosition(e).y, 15, 15);
-
+        for (Restaurant e : findActiveIntersections()) {
+            drawConcentricIntersectGlyph(e);
+            drawRestaurantMarker(e);    //maybe helps with occulsion?
         }
-        // for (Map.Entry<Category, List<Restaurant> entries : myActiveSelections.c>)
     }
 
-    private void drawRestaurantMarkers() {
+    private void drawConcentricIntersectGlyph(Restaurant e) {
+
+        int ringSize = 15;
+        for (Category category : myIntersectCategories.get(e)) {
+            //System.out.println("GETS HERE: " + category);
+
+            stroke(category.getColor());
+            strokeWeight(6);
+            ellipse(toScreenPosition(e).x, toScreenPosition(e).y,
+                    ringSize, ringSize);
+            ringSize += 11;
+        }
+        //System.out.println("---");
+    }
+
+    private void drawAllRestaurantMarkers() {
         for (List<Restaurant> restaurants : mySubCategories.values()) {
-            for (Restaurant e : restaurants) {
-                drawDefaultRestaurantMarker(e);
-            }
+            for (Restaurant e : restaurants) { drawRestaurantMarker(e); }
         }
     }
 
-    private void drawDefaultRestaurantMarker(Restaurant e) {
+    private void drawActiveRestaurantMarkers() {
+        for (List<Restaurant> restaurants : myActiveSelections.values()) {
+            for (Restaurant e : restaurants) { drawRestaurantMarker(e); }
+        }
+    }
+
+    private void drawRestaurantMarker(Restaurant e) {
         fill(175);
         stroke(0);
         strokeWeight(1);
@@ -138,9 +149,31 @@ public class LineSets extends PApplet {
         }
 
         allActive.retainAll(activeRestaurantTypes);
+        for (Restaurant e : allActive) {
+            addToIntersectCategoryMap(e, e.getType());
+        }
         allActive.retainAll(activeRestaurantRatings);
-
+        for (Restaurant e : allActive) {
+            addToIntersectCategoryMap(e, e.getRating());
+        }
         return allActive;
+    }
+
+    private void clearIntersectCategoryMap() {
+        for (Map.Entry<Restaurant, List<Category>> entry :
+                myIntersectCategories.entrySet()) {
+            if (entry.getValue() != null) {
+                entry.getValue().clear();
+            }
+        }
+    }
+
+    private void addToIntersectCategoryMap(Restaurant e, Category category) {
+        if (myIntersectCategories.get(e) == null) {
+            myIntersectCategories.put(e, new LinkedList<Category>());
+        } else {
+            myIntersectCategories.get(e).add(category);
+        }
     }
 
     /**
@@ -167,8 +200,7 @@ public class LineSets extends PApplet {
                 for (Restaurant r : curRestaurants) {
                     ScreenPosition curPosition = toScreenPosition(r);
                     curveVertex(curPosition.x, curPosition.y);
-                    noFill();
-                    strokeWeight(4);
+                    strokeWeight(5);
                     ellipse(curPosition.x, curPosition.y, 12, 12);
                 }
                 curveVertex(last.x, last.y);
@@ -232,7 +264,6 @@ public class LineSets extends PApplet {
         for (Restaurant r : ordering) {
             mySubCategories.get(category).add(r);
         }*/
-
         KruskalMinimumSpanningTree<Restaurant, DefaultWeightedEdge> mst =
                 new KruskalMinimumSpanningTree<>(g);
 
@@ -248,18 +279,9 @@ public class LineSets extends PApplet {
                 new DepthFirstIterator<>(subgraph);
 
         mySubCategories.get(category).clear();
-        boolean test = true;
+
         while (treeIter.hasNext()) {
-            if (test) {
-                Restaurant first = treeIter.next();
-                System.out.println("first rest for " + category
-                        + " is: " + first);
-                mySubCategories.get(category).add(first);
-                test = false;
-            }
-            else {
-                mySubCategories.get(category).add(treeIter.next());
-            }
+            mySubCategories.get(category).add(treeIter.next());
         }
     }
 
@@ -293,9 +315,6 @@ public class LineSets extends PApplet {
         //Gui.createRestaurantPriceButtons(myControls, plotX1, plotY1);
     }
 
-
-    //Handle callbacks for each button, really these should probably be in a
-    //dedicated listener but eh.
     private void american(int theValue) {
         updateActiveSelection("american", RestaurantType.AMERICAN);
     }
@@ -314,6 +333,19 @@ public class LineSets extends PApplet {
 
     private void three(int theValue) {
         updateActiveSelection("three", RestaurantRating.THREE);
+    }
+
+    private void threePointFive(int theValue) {
+        updateActiveSelection("threePointFive",
+                RestaurantRating.THREE_POINT_FIVE);
+    }
+
+    private void four(int theValue) {
+        updateActiveSelection("four", RestaurantRating.FOUR);
+    }
+
+    private void fourPointFive(int theValue) {
+        updateActiveSelection("fourPointFive", RestaurantRating.FOUR_POINT_FIVE);
     }
 
     private void updateActiveSelection(String name, Category category) {

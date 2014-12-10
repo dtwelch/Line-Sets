@@ -1,16 +1,17 @@
-/* This file is part of 'LineSets', a final project for cpsc804: Data
+/*
+ * This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
- *
+ * 
  * LineSets is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * LineSets is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with LineSets. If not, see http://www.gnu.org/licenses/.
  */
@@ -35,14 +36,14 @@ public class Gui {
         Button american = cp5.addButton("american");
         american.setPosition(plotX1 + 20, plotY1 + 35).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantType.AMERICAN.getColor())
-                .setSwitch(true);
+                .setColorActive(RestaurantType.AMERICAN.getColor()).setSwitch(
+                        true);
 
         Button italian = cp5.addButton("italian");
         italian.setPosition(plotX1 + 20 + 110, plotY1 + 35).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantType.ITALIAN.getColor())
-                .setSwitch(true);
+                .setColorActive(RestaurantType.ITALIAN.getColor()).setSwitch(
+                        true);
 
         Button asian = cp5.addButton("asian");
         asian.setPosition(plotX1 + 20, plotY1 + 60).setSize(100, 20)
@@ -53,8 +54,8 @@ public class Gui {
         Button mexican = cp5.addButton("mexican");
         mexican.setPosition(plotX1 + 20 + 110, plotY1 + 60).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantType.MEXICAN.getColor())
-                .setSwitch(true);
+                .setColorActive(RestaurantType.MEXICAN.getColor()).setSwitch(
+                        true);
     }
 
     public static void createRestaurantRatingButtons(ControlP5 cp5,
@@ -62,9 +63,9 @@ public class Gui {
         Button three = cp5.addButton("three");
         three.setPosition(plotX1 + 260, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantRating.THREE.getColor())
-                .setSwitch(true).setCaptionLabel("3").getCaptionLabel()
-                .align(PApplet.CENTER, PApplet.CENTER);
+                .setColorActive(RestaurantRating.THREE.getColor()).setSwitch(
+                        true).setCaptionLabel("3").getCaptionLabel().align(
+                        PApplet.CENTER, PApplet.CENTER);
 
         Button threePointFive = cp5.addButton("threePointFive");
         threePointFive.setPosition(plotX1 + 290, plotY1 + 35).setSize(20, 20)
@@ -76,15 +77,15 @@ public class Gui {
         Button four = cp5.addButton("four");
         four.setPosition(plotX1 + 320, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantRating.FOUR.getColor())
-                .setSwitch(true).setCaptionLabel("4.0").getCaptionLabel()
-                .align(PApplet.CENTER, PApplet.CENTER);
+                .setColorActive(RestaurantRating.FOUR.getColor()).setSwitch(
+                        true).setCaptionLabel("4.0").getCaptionLabel().align(
+                        PApplet.CENTER, PApplet.CENTER);
 
         Button fourPointFive = cp5.addButton("fourPointFive");
         fourPointFive.setPosition(plotX1 + 350, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantRating.FOUR.getColor())
-                .setSwitch(true).setCaptionLabel("4.5").getCaptionLabel()
-                .align(PApplet.CENTER, PApplet.CENTER);
+                .setColorActive(RestaurantRating.FOUR_POINT_FIVE.getColor())
+                .setSwitch(true).setCaptionLabel("4.5").getCaptionLabel().align(
+                        PApplet.CENTER, PApplet.CENTER);
     }
 }

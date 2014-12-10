@@ -1,4 +1,5 @@
-/* This file is part of 'LineSets', a final project for cpsc804: Data
+/*
+ * This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
  * 
  * LineSets is free software: you can redistribute it and/or modify
@@ -30,43 +31,51 @@ public class Restaurant {
     public static enum RestaurantType implements Category {
         AMERICAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "cajun", "american", "hotdogs" };
             }
 
-            @Override public Integer getColor() {
-                return 0xFFF2003C;
+            @Override
+            public Integer getColor() {
+                return 0xFF1b9e77;
             }
         },
         ITALIAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "italian", "pizza" };
             }
 
-            @Override public Integer getColor() {
-                return 0xFF984EA3;
+            @Override
+            public Integer getColor() {
+                return 0xFFa6cee3;
             }
         },
         ASIAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "korean", "japanese", "chinese",
                         "vietnamese", "asianfusion" };
             }
 
-            @Override public Integer getColor() {
-                return 0xFF4DAF4A;
+            @Override
+            public Integer getColor() {
+                return 0xFF1f78b4;
             }
         },
         MEXICAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "spanish", "mexican" };
             }
 
-            @Override public Integer getColor() {
-                return -13079376;
+            @Override
+            public Integer getColor() {
+                return 0xFFb2df8a;
             }
         };
 
@@ -93,30 +102,35 @@ public class Restaurant {
 
         THREE {
 
-            @Override public Integer getColor() {
-                return 0xFFBF5B17;
+            @Override
+            public Integer getColor() {
+                return 0xFFfb9a99;
             }
         },
         THREE_POINT_FIVE {
 
-            @Override public Integer getColor() {
-                return 0xFF38D44E;
+            @Override
+            public Integer getColor() {
+                return 0xFFe31a1c;
             }
         },
         FOUR {
 
-            @Override public Integer getColor() {
-                return 0x38D44E;
+            @Override
+            public Integer getColor() {
+                return 0xFFfdbf6f;
             }
         },
         FOUR_POINT_FIVE {
 
-            @Override public Integer getColor() {
-                return 0xFF38D44E;
+            @Override
+            public Integer getColor() {
+                return 0xFFff7f00;
             }
         };
 
-        @Override public String getCategoryDescription() {
+        @Override
+        public String getCategoryDescription() {
             return "rating";
         }
     }
@@ -151,7 +165,8 @@ public class Restaurant {
         return myID.hashCode();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return myName + " : " + myID;
     }
 
@@ -220,7 +235,8 @@ public class Restaurant {
             return this;
         }
 
-        @Override public Restaurant build() {
+        @Override
+        public Restaurant build() {
             if (myType == null) {
                 throw new IllegalStateException("Null restaurant type. All"
                         + " restaurants must have a type.");

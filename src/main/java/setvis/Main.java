@@ -1,4 +1,5 @@
-/* This file is part of 'LineSets', a final project for cpsc804: Data
+/*
+ * This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
  * 
  * LineSets is free software: you can redistribute it and/or modify
