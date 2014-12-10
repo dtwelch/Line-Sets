@@ -20,11 +20,16 @@ import de.fhpotsdam.unfolding.marker.*;
 import de.fhpotsdam.unfolding.geo.*;
 import processing.core.*;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
- * A point marker which can show a label containing the marker's name.
+ * <p>A <code>RestaurantMarker</code> is a point marker designed to illustrate
+ * intersection points via concentric, colored circles.</p>
  */
 public class RestaurantMarker extends SimplePointMarker {
 
+    private Set<Category> myActiveIntersections = new LinkedHashSet<>();
     protected String myName;
     protected int space = 10;
 
@@ -39,8 +44,21 @@ public class RestaurantMarker extends SimplePointMarker {
         myName = name;
     }
 
+    public void addIntersection(Category category) {
+        myActiveIntersections.add(category);
+    }
+
+    public void removeIntersection(Category category) {
+        myActiveIntersections.remove(category);
+    }
+
     /**
-     * Displays this marker's name in a box.
+     * <p>Displays both this markers name and the active intersections
+     * textually and visually.</p>
+     *
+     * @param pg
+     * @param x An x coordinate.
+     * @param y A y coordinate.
      */
     public void draw(PGraphics pg, float x, float y) {
         pg.pushStyle();
@@ -59,6 +77,15 @@ public class RestaurantMarker extends SimplePointMarker {
             pg.stroke(strokeColor);
         }
         pg.ellipse(x, y, 7, 7);// TODO use radius in km and convert to px
+
+        int initialSize = 12;
+        for (Category category : myActiveIntersections) {
+            pg.noFill();
+            pg.strokeWeight(5);
+            pg.stroke(category.getColor());
+            pg.ellipse(x, y, initialSize, initialSize);
+            initialSize += 12;
+        }
 
         // label
         if (selected && myName != null) {

@@ -91,6 +91,7 @@ public class LineSets extends PApplet {
             marker.setColor(175);
             marker.setHighlightColor(0xFFF2003C);
             myBackgroundMap.addMarker(marker);
+            myMarkers.put(e, marker);
         }
     }
 
@@ -99,9 +100,8 @@ public class LineSets extends PApplet {
 
         drawActiveCurves();
         drawRestaurantMarkers();
-
-        drawActiveCurveIntersections();
-
+        //drawActiveCurveIntersections();
+        //updateIntersections();
         drawCategoryPanels();
         clearIntersectCategoryMap();
     }
@@ -110,6 +110,10 @@ public class LineSets extends PApplet {
         for (Marker m : myBackgroundMap.getMarkers()) {
             m.draw(myBackgroundMap);
         }
+    }
+
+    private void updateIntersections() {
+
     }
 
     private void drawActiveCurveIntersections() {
@@ -219,8 +223,8 @@ public class LineSets extends PApplet {
                 for (Restaurant r : curRestaurants) {
                     ScreenPosition curPosition = toScreenPosition(r);
                     curveVertex(curPosition.x, curPosition.y);
-                    strokeWeight(5);
-                    ellipse(curPosition.x, curPosition.y, 12, 12);
+                    //strokeWeight(5);
+                    //ellipse(curPosition.x, curPosition.y, 12, 12);
                 }
                 curveVertex(last.x, last.y);
                 endShape();
@@ -376,8 +380,15 @@ public class LineSets extends PApplet {
         if (myControls.get(Button.class, name).getBooleanValue()) {
             List<Restaurant> selected = mySubCategories.get(category);
             myActiveSelections.get(category).addAll(selected);
+
+            for (Restaurant e : myActiveSelections.get(category)) {
+                myMarkers.get(e).addIntersection(category);
+            }
         }
         else {
+            for (Restaurant e : myActiveSelections.get(category)) {
+                myMarkers.get(e).removeIntersection(category);
+            }
             myActiveSelections.get(category).clear();
         }
     }
