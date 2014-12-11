@@ -1,4 +1,5 @@
-/* This file is part of 'LineSets', a final project for cpsc804: Data
+/*
+ * This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
  *
  * LineSets is free software: you can redistribute it and/or modify
@@ -55,9 +56,6 @@ public class LineSets extends PApplet {
     private final Map<Category, List<Restaurant>> myActiveSelections =
             new HashMap<>();
 
-    private final Map<Restaurant, Set<Category>> myIntersectCategories =
-            new HashMap<>();
-
     private final Map<Restaurant, RestaurantMarker> myMarkers =
             new HashMap<>();
 
@@ -66,16 +64,39 @@ public class LineSets extends PApplet {
     private UnfoldingMap myBackgroundMap;
     private float plotX1, plotY1, plotX2, plotY2;
 
+    /**
+     * <p>Initializes all variables and objects used by the visualization.
+     * This is only executed <em>once</em>.</p>
+     */
     @Override public void setup() {
         size(700, 600);
         plotX1 = 0; plotY1 = 0; plotX2 = width; plotY2 = 60;
 
+        //Configures the map: chooses provider, sets panning restrictions, etc
         createMapBackground();
 
+        //Sets up the controlP5 buttons
         createCategoryControlPanels();
+
+        //Parse the data and create our own Restaurant objects
         preprocessInput();
+
+        //Uses 2-opt TSP heuristic to find a reasonable restaurant ordering
         computeAndUpdateRestaurantOrderings();
+
+        //Adds restaurant markers to the unfolding background map
         createRestaurantMarkers();
+    }
+
+    /**
+     * <p>The main draw 'loop'. This is executed repeatedly after
+     * {@link #setup()}.</p>
+     */
+    @Override public void draw() {
+        myBackgroundMap.draw();
+        drawActiveCurves();
+        drawRestaurantMarkers();    //Re-draw the markers ontop of curves
+        drawCategoryPanels();
     }
 
     private void createRestaurantMarkers() {
@@ -95,47 +116,24 @@ public class LineSets extends PApplet {
         }
     }
 
-    @Override public void draw() {
-        myBackgroundMap.draw();
+    /**
+     * <p>Initializes and sets parameters such as default zoom levels and
+     * panning boundaries for the background citymap.</p>
+     */
+    private void createMapBackground() {
+        myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
+        myBackgroundMap.zoomAndPanTo(12, new Location(47.626, -122.337));
+        myBackgroundMap.zoomToLevel(13);
+        myBackgroundMap.setBackgroundColor(0);
 
-        drawActiveCurves();
-        drawRestaurantMarkers();
-        //drawActiveCurveIntersections();
-        //updateIntersections();
-        drawCategoryPanels();
-        clearIntersectCategoryMap();
+        MapUtils.createDefaultEventDispatcher(this, myBackgroundMap);
+        myBackgroundMap.setTweening(true);
     }
 
     private void drawRestaurantMarkers() {
         for (Marker m : myBackgroundMap.getMarkers()) {
             m.draw(myBackgroundMap);
         }
-    }
-
-    private void updateIntersections() {
-
-    }
-
-    private void drawActiveCurveIntersections() {
-        for (Restaurant e : findActiveIntersections()) {
-            drawConcentricIntersectGlyph(e);
-            //drawRestaurantMarkers(); //maybe helps with occulsion?
-        }
-    }
-
-    private void drawConcentricIntersectGlyph(Restaurant e) {
-
-        int ringSize = 15;
-        for (Category category : myIntersectCategories.get(e)) {
-            //System.out.println("GETS HERE: " + category);
-
-            stroke(category.getColor());
-            strokeWeight(6);
-            ellipse(toScreenPosition(e).x, toScreenPosition(e).y,
-                    ringSize, ringSize);
-            ringSize += 11;
-        }
-        //System.out.println("---");
     }
 
     public void mouseMoved() {
@@ -149,59 +147,9 @@ public class LineSets extends PApplet {
         }
     }
 
-    private Set<Restaurant> findActiveIntersections() {
-
-        Set<Restaurant> allActive = new HashSet<>();
-        Set<Restaurant> activeRestaurantTypes = new HashSet<>();
-        Set<Restaurant> activeRestaurantRatings = new HashSet<>();
-        Set<Restaurant> activeRestaurantPrices = new HashSet<>();
-
-        //first compute the union of all active restaurant types.
-        //i.e. active(American) U .. U active(Mexican)
-        for (Map.Entry<Category, List<Restaurant>> entry :
-                myActiveSelections.entrySet()) {
-
-            if (entry.getKey() instanceof RestaurantType) {
-                activeRestaurantTypes.addAll(entry.getValue());
-            }
-            else if (entry.getKey() instanceof RestaurantRating) {
-                activeRestaurantRatings.addAll(entry.getValue());
-            }
-            allActive.addAll(entry.getValue());
-        }
-
-        allActive.retainAll(activeRestaurantTypes);
-        for (Restaurant e : allActive) {
-            addToIntersectCategoryMap(e, e.getType());
-        }
-        allActive.retainAll(activeRestaurantRatings);
-        for (Restaurant e : allActive) {
-            addToIntersectCategoryMap(e, e.getRating());
-        }
-        return allActive;
-    }
-
-    private void clearIntersectCategoryMap() {
-        for (Map.Entry<Restaurant, Set<Category>> entry :
-                myIntersectCategories.entrySet()) {
-            if (entry.getValue() != null) {
-                entry.getValue().clear();
-            }
-        }
-    }
-
-    //generalize this with the other method that adds to the subcategory map..
-    private void addToIntersectCategoryMap(Restaurant e, Category category) {
-        if (myIntersectCategories.get(e) == null) {
-            myIntersectCategories.put(e, new LinkedHashSet<Category>());
-        } else {
-            myIntersectCategories.get(e).add(category);
-        }
-    }
-
     /**
-     * <p>Draws a smooth curve through every point in each of the subcategories
-     * selected -- maintained by <code>myActiveSelections</code>.</p>
+     * <p>Draws a smooth curve through all points in the subcategories
+     * maintained by <code>myActiveSelections</code>.</p>
      */
     private void drawActiveCurves() {
 
@@ -215,16 +163,13 @@ public class LineSets extends PApplet {
                         .get(curRestaurants.size() - 1));
 
                 beginShape();
+                noFill();
                 stroke(e.getKey().getColor());
                 strokeWeight(7);
-                noFill();
                 curveVertex(first.x, first.y);
 
                 for (Restaurant r : curRestaurants) {
-                    ScreenPosition curPosition = toScreenPosition(r);
-                    curveVertex(curPosition.x, curPosition.y);
-                    //strokeWeight(5);
-                    //ellipse(curPosition.x, curPosition.y, 12, 12);
+                    curveVertex(toScreenPosition(r).x, toScreenPosition(r).y);
                 }
                 curveVertex(last.x, last.y);
                 endShape();
@@ -241,21 +186,8 @@ public class LineSets extends PApplet {
     }
 
     /**
-     * <p>Initializes and sets parameters such as default zoom levels and
-     * panning boundaries for the background citymap.</p>
-     */
-    private void createMapBackground() {
-        myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
-        myBackgroundMap.zoomAndPanTo(12, new Location(47.626, -122.337));
-        myBackgroundMap.zoomToLevel(13);
-        myBackgroundMap.setBackgroundColor(0);
-
-        MapUtils.createDefaultEventDispatcher(this, myBackgroundMap);
-        myBackgroundMap.setTweening(true);
-    }
-
-    /**
-     * <p></p>
+     * <p>Computes for each category a 2-opt ordering of its contained
+     * {@link Restaurant}s.</p>
      */
     private void computeAndUpdateRestaurantOrderings() {
         for (Map.Entry<Category, List<Restaurant>> e : mySubCategories
@@ -280,13 +212,6 @@ public class LineSets extends PApplet {
                 }
             }
         }
-
-        /*List<Restaurant> ordering =
-                HamiltonianCycle.getApproximateOptimalForCompleteGraph(g);
-
-        for (Restaurant r : ordering) {
-            mySubCategories.get(category).add(r);
-        }*/
         KruskalMinimumSpanningTree<Restaurant, DefaultWeightedEdge> mst =
                 new KruskalMinimumSpanningTree<>(g);
 
@@ -325,7 +250,7 @@ public class LineSets extends PApplet {
         fill(130, 130, 130, 210);
         rect(plotX1 + 390, plotY1 + 10, 130, plotY2 - 5, 6);
         fill(240);
-        text("Price", plotX1 + 395, plotY1 + 25);
+        text("Review Count", plotX1 + 395, plotY1 + 25);
     }
 
     public void createCategoryControlPanels(){
@@ -338,6 +263,8 @@ public class LineSets extends PApplet {
         //Gui.createRestaurantPriceButtons(myControls, plotX1, plotY1);
     }
 
+    //TODO: The following methods should really go in some kind of dedicated,
+    //self contained listener class.
     private void american(int theValue) {
         updateActiveSelection("american", RestaurantType.AMERICAN);
     }
@@ -432,7 +359,8 @@ public class LineSets extends PApplet {
         for (Category category : categories) {
             if (mySubCategories.get(category) == null) {
                 mySubCategories.put(category, new LinkedList<Restaurant>());
-            } else {
+            }
+            else {
                 mySubCategories.get(category).add(e);
             }
         }

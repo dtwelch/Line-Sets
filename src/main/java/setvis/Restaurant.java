@@ -135,6 +135,27 @@ public class Restaurant {
         }
     }
 
+    public static enum RestaurantReviews implements Category {
+
+        FEW {
+            @Override
+            public Integer getColor() {
+                return 0xFFff7f00;
+            }
+        },
+        MANY {
+            @Override
+            public Integer getColor() {
+                return 0xFFff7f00;
+            }
+        };
+
+        @Override
+        public String getCategoryDescription() {
+            return "review count";
+        }
+    }
+
     private final String myName, myID;
     private final Location myLocation;
 
@@ -161,10 +182,6 @@ public class Restaurant {
         return myType;
     }
 
-    public String getId() {
-        return myID;
-    }
-
     public RestaurantRating getRating() {
         return myRating;
     }
@@ -173,12 +190,11 @@ public class Restaurant {
         return myID.hashCode();
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return myName + " : " + myID;
     }
 
-    public boolean equals(Object o) {
+    @Override public boolean equals(Object o) {
         boolean result = (o instanceof Restaurant);
 
         if (result) {

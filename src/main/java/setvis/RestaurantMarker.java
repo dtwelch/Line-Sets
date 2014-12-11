@@ -1,4 +1,5 @@
-/* This file is part of 'LineSets', a final project for cpsc804: Data
+/*
+ * This file is part of 'LineSets', a final project for cpsc804: Data
  * Visualization.
  *
  * LineSets is free software: you can redistribute it and/or modify
@@ -26,6 +27,8 @@ import java.util.Set;
 /**
  * <p>A <code>RestaurantMarker</code> is a point marker designed to illustrate
  * intersection points via concentric, colored circles.</p>
+ *
+ * @author dwelch <dtw.welch@gmail.com>
  */
 public class RestaurantMarker extends SimplePointMarker {
 
@@ -44,6 +47,10 @@ public class RestaurantMarker extends SimplePointMarker {
         myName = name;
     }
 
+    public String getName() {
+        return myName;
+    }
+
     public void addIntersection(Category category) {
         myActiveIntersections.add(category);
     }
@@ -54,7 +61,7 @@ public class RestaurantMarker extends SimplePointMarker {
 
     /**
      * <p>Displays both this markers name and the active intersections
-     * textually and visually.</p>
+     * textually (pop up box) and visually (concentric, colored circles).</p>
      *
      * @param pg
      * @param x An x coordinate.
@@ -64,10 +71,16 @@ public class RestaurantMarker extends SimplePointMarker {
         pg.pushStyle();
         pg.pushMatrix();
 
-        if (selected) {
-            pg.translate(0, 0);
-        }
+        if (selected) { pg.translate(0, 0); }
 
+        int initialSize = 13;
+        for (Category category : myActiveIntersections) {
+            pg.noFill();
+            pg.strokeWeight(5);
+            pg.stroke(category.getColor());
+            pg.ellipse(x, y, initialSize, initialSize);
+            initialSize += 10;
+        }
         pg.strokeWeight(strokeWeight);
         if (selected) {
             pg.fill(highlightColor);
@@ -76,33 +89,21 @@ public class RestaurantMarker extends SimplePointMarker {
             pg.fill(color);
             pg.stroke(strokeColor);
         }
-        pg.ellipse(x, y, 7, 7);// TODO use radius in km and convert to px
-
-        int initialSize = 12;
-        for (Category category : myActiveIntersections) {
-            pg.noFill();
-            pg.strokeWeight(5);
-            pg.stroke(category.getColor());
-            pg.ellipse(x, y, initialSize, initialSize);
-            initialSize += 12;
-        }
+        pg.ellipse(x, y, 7, 7);
 
         // label
         if (selected && myName != null) {
-            pg.fill(highlightColor);
-            pg.stroke(highlightStrokeColor);
-            pg.rect(x + strokeWeight / 2, y - fontSize + strokeWeight / 2 - space,
+            pg.fill(130, 130, 130, 150);
+            pg.noStroke();
+            pg.rect(10 + x + strokeWeight / 2,
+                    y - fontSize + strokeWeight / 2 - space,
                     pg.textWidth(myName) + space * 1.5f,
-                    fontSize + space);
+                    fontSize + space, 4);
             pg.fill(255, 255, 255);
-            pg.text(myName, Math.round(x + space * 0.75f + strokeWeight / 2),
+            pg.text(myName, Math.round(10+x + space * 0.75f + strokeWeight / 2),
                     Math.round(y + strokeWeight / 2 - space * 0.75f));
         }
         pg.popMatrix();
         pg.popStyle();
-    }
-
-    public String getName() {
-        return myName;
     }
 }

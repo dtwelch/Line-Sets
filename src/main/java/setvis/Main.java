@@ -22,7 +22,7 @@ import processing.core.PApplet;
 /**
  * <p>Starts the main application.</p>
  *
- * @author Dwelch <dtw.welch@gmail.com>
+ * @author dwelch <dtw.welch@gmail.com>
  */
 public class Main {
 

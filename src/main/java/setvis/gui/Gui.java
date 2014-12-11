@@ -85,7 +85,7 @@ public class Gui {
         fourPointFive.setPosition(plotX1 + 350, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
                 .setColorActive(RestaurantRating.FOUR_POINT_FIVE.getColor())
-                .setSwitch(true).setCaptionLabel("4.5").getCaptionLabel().align(
-                        PApplet.CENTER, PApplet.CENTER);
+                .setSwitch(true).setCaptionLabel("4.5").getCaptionLabel()
+                .align(PApplet.CENTER, PApplet.CENTER);
     }
 }
