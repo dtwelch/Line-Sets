@@ -31,50 +31,42 @@ public class Restaurant {
     public static enum RestaurantType implements Category {
         AMERICAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "cajun", "american", "hotdogs" };
             }
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getColor() {
                 return 0xFF1b9e77;
             }
         },
         ITALIAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "italian", "pizza" };
             }
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getColor() {
                 return 0xFFF2003C;
             }
         },
         ASIAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "korean", "japanese", "chinese",
                         "vietnamese", "asianfusion" };
             }
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getColor() {
                 return 0xFF1f78b4;
             }
         },
         MEXICAN {
 
-            @Override
-            protected String[] getValidSynonyms() {
+            @Override protected String[] getValidSynonyms() {
                 return new String[] { "spanish", "mexican" };
             }
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getColor() {
                 return 0xFFb2df8a;
             }
         };
@@ -102,63 +94,65 @@ public class Restaurant {
 
         THREE {
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getColor() {
                 return 0xFFfb9a99;
             }
         },
         THREE_POINT_FIVE {
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getColor() {
                 return 0xFFe31a1c;
             }
         },
         FOUR {
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getColor() {
                 return 0xFFfdbf6f;
             }
         },
         FOUR_POINT_FIVE {
 
-            @Override
-            public Integer getColor() {
+            @Override public Integer getColor() {
                 return 0xFFff7f00;
             }
         };
 
-        @Override
-        public String getCategoryDescription() {
+        @Override public String getCategoryDescription() {
             return "rating";
         }
     }
 
-    public static enum RestaurantReviews implements Category {
+    public static enum RestaurantReviewCount implements Category {
 
-        FEW {
-            @Override
-            public Integer getColor() {
+        SMALL_COUNT {
+
+            @Override public Integer getColor() {
                 return 0xFFff7f00;
             }
         },
-        MANY {
-            @Override
-            public Integer getColor() {
+        MEDIUM_COUNT {
+
+            @Override public Integer getColor() {
+                return 0xFFff7f00;
+            }
+        },
+        LARGE_COUNT {
+
+            @Override public Integer getColor() {
                 return 0xFFff7f00;
             }
         };
 
-        @Override
-        public String getCategoryDescription() {
+        @Override public String getCategoryDescription() {
             return "review count";
         }
     }
 
     private final String myName, myID;
+
     private final Location myLocation;
 
+    private final RestaurantReviewCount myReviewCount;
     private final RestaurantType myType;
     private final RestaurantRating myRating;
 
@@ -166,8 +160,10 @@ public class Restaurant {
         myName = builder.myName;
         myID = builder.myID;
         myLocation = builder.myLocation;
+
         myType = builder.myType;
         myRating = builder.myRating;
+        myReviewCount = builder.myReviewCount;
     }
 
     public String getName() {
@@ -176,6 +172,10 @@ public class Restaurant {
 
     public Location getLocation() {
         return myLocation;
+    }
+
+    public RestaurantReviewCount getReviewCount() {
+        return myReviewCount;
     }
 
     public RestaurantType getType() {
@@ -208,6 +208,7 @@ public class Restaurant {
         private String myName, myID;
         private Location myLocation;
 
+        private RestaurantReviewCount myReviewCount;
         private RestaurantType myType;
         private RestaurantRating myRating;
 
@@ -228,9 +229,17 @@ public class Restaurant {
             myID = id;
             return this;
         }
+        public RestaurantReviewCount getReviewCount() {
+            return myReviewCount;
+        }
 
         public RestaurantBuilder type(RestaurantType type) {
             myType = type;
+            return this;
+        }
+
+        public RestaurantBuilder reviewCount(RestaurantReviewCount count) {
+            myReviewCount = count;
             return this;
         }
 
@@ -239,30 +248,10 @@ public class Restaurant {
             return this;
         }
 
-        public RestaurantBuilder rating(double rating) {
-            if (rating == 3.0) {
-                myRating = RestaurantRating.THREE;
-            }
-            else if (rating == 3.5) {
-                myRating = RestaurantRating.THREE_POINT_FIVE;
-            }
-            else if (rating == 4.0) {
-                myRating = RestaurantRating.FOUR;
-            }
-            else if (rating == 4.5) {
-                myRating = RestaurantRating.FOUR_POINT_FIVE;
-            }
-            else {
-                throw new IllegalArgumentException("Unknown rating: " + rating
-                        + ". Use the range (3.0 - 4.5) with increments of .5.");
-            }
-            return this;
-        }
-
-        @Override
-        public Restaurant build() {
-            if (myType == null || myRating == null) {
-                throw new IllegalStateException("Null category.");
+        @Override public Restaurant build() {
+            if (myType == null || myRating == null || myReviewCount == null) {
+                throw new IllegalStateException("Null category detected. All" +
+                        " categories must be non-null.");
             }
 
             if (myLocation == null) {
