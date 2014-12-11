@@ -121,7 +121,11 @@ public class LineSets extends PApplet {
      */
     private void createMapBackground() {
         myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
-        myBackgroundMap.zoomAndPanTo(12, new Location(47.626, -122.337));
+
+        Location defaultLocation = new Location(47.626, -122.337);
+        myBackgroundMap.zoomAndPanTo(12, defaultLocation);
+        myBackgroundMap.setPanningRestriction(defaultLocation, 4);
+        myBackgroundMap.setZoomRange(13, 17);
         myBackgroundMap.zoomToLevel(13);
         myBackgroundMap.setBackgroundColor(0);
 

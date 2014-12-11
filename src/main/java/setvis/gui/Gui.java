@@ -38,13 +38,13 @@ public class Gui {
         american.setPosition(plotX1 + 20, plotY1 + 35).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
                 .setColorActive(RestaurantType.AMERICAN.getColor()).setSwitch(
-                true);
+                        true);
 
         Button italian = cp5.addButton("italian");
         italian.setPosition(plotX1 + 20 + 110, plotY1 + 35).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
                 .setColorActive(RestaurantType.ITALIAN.getColor()).setSwitch(
-                true);
+                        true);
 
         Button asian = cp5.addButton("asian");
         asian.setPosition(plotX1 + 20, plotY1 + 60).setSize(100, 20)
@@ -56,7 +56,7 @@ public class Gui {
         mexican.setPosition(plotX1 + 20 + 110, plotY1 + 60).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
                 .setColorActive(RestaurantType.MEXICAN.getColor()).setSwitch(
-                true);
+                        true);
     }
 
     public static void createRestaurantRatingButtons(ControlP5 cp5,
@@ -65,8 +65,8 @@ public class Gui {
         three.setPosition(plotX1 + 260, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
                 .setColorActive(RestaurantRating.THREE.getColor()).setSwitch(
-                true).setCaptionLabel("3").getCaptionLabel().align(
-                PApplet.CENTER, PApplet.CENTER);
+                        true).setCaptionLabel("3").getCaptionLabel().align(
+                        PApplet.CENTER, PApplet.CENTER);
 
         Button threePointFive = cp5.addButton("threePointFive");
         threePointFive.setPosition(plotX1 + 290, plotY1 + 35).setSize(20, 20)
@@ -79,8 +79,8 @@ public class Gui {
         four.setPosition(plotX1 + 320, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
                 .setColorActive(RestaurantRating.FOUR.getColor()).setSwitch(
-                true).setCaptionLabel("4.0").getCaptionLabel().align(
-                PApplet.CENTER, PApplet.CENTER);
+                        true).setCaptionLabel("4.0").getCaptionLabel().align(
+                        PApplet.CENTER, PApplet.CENTER);
 
         Button fourPointFive = cp5.addButton("fourPointFive");
         fourPointFive.setPosition(plotX1 + 350, plotY1 + 35).setSize(20, 20)
@@ -91,7 +91,7 @@ public class Gui {
     }
 
     public static void createRestaurantReviewCountButtons(ControlP5 cp5,
-                                               float plotX1, float plotY1) {
+            float plotX1, float plotY1) {
         Button smallReviewCt = cp5.addButton("smallReviewCount");
         smallReviewCt.setPosition(plotX1 + 400, plotY1 + 35).setSize(50, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)

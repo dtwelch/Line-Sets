@@ -31,42 +31,50 @@ public class Restaurant {
     public static enum RestaurantType implements Category {
         AMERICAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "cajun", "american", "hotdogs" };
             }
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFF1b9e77;
             }
         },
         ITALIAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "italian", "pizza" };
             }
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFFF2003C;
             }
         },
         ASIAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "korean", "japanese", "chinese",
                         "vietnamese", "asianfusion" };
             }
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFF1f78b4;
             }
         },
         MEXICAN {
 
-            @Override protected String[] getValidSynonyms() {
+            @Override
+            protected String[] getValidSynonyms() {
                 return new String[] { "spanish", "mexican" };
             }
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFFb2df8a;
             }
         };
@@ -94,30 +102,35 @@ public class Restaurant {
 
         THREE {
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFFfb9a99;
             }
         },
         THREE_POINT_FIVE {
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFFe31a1c;
             }
         },
         FOUR {
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFFfdbf6f;
             }
         },
         FOUR_POINT_FIVE {
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFFff7f00;
             }
         };
 
-        @Override public String getCategoryDescription() {
+        @Override
+        public String getCategoryDescription() {
             return "rating";
         }
     }
@@ -126,24 +139,28 @@ public class Restaurant {
 
         SMALL_COUNT {
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFFff7f00;
             }
         },
         MEDIUM_COUNT {
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFFff7f00;
             }
         },
         LARGE_COUNT {
 
-            @Override public Integer getColor() {
+            @Override
+            public Integer getColor() {
                 return 0xFFff7f00;
             }
         };
 
-        @Override public String getCategoryDescription() {
+        @Override
+        public String getCategoryDescription() {
             return "review count";
         }
     }
@@ -190,11 +207,13 @@ public class Restaurant {
         return myID.hashCode();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return myName + " : " + myID;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         boolean result = (o instanceof Restaurant);
 
         if (result) {
@@ -229,6 +248,7 @@ public class Restaurant {
             myID = id;
             return this;
         }
+
         public RestaurantReviewCount getReviewCount() {
             return myReviewCount;
         }
@@ -248,10 +268,11 @@ public class Restaurant {
             return this;
         }
 
-        @Override public Restaurant build() {
+        @Override
+        public Restaurant build() {
             if (myType == null || myRating == null || myReviewCount == null) {
-                throw new IllegalStateException("Null category detected. All" +
-                        " categories must be non-null.");
+                throw new IllegalStateException("Null category detected. All"
+                        + " categories must be non-null.");
             }
 
             if (myLocation == null) {
