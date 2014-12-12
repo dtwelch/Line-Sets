@@ -111,7 +111,7 @@ public class Restaurant {
 
             @Override
             public Integer getColor() {
-                return 0xFFe31a1c;
+                return 0xFF6a3d9a;
             }
         },
         FOUR {
@@ -135,18 +135,27 @@ public class Restaurant {
         }
     }
 
-    public static enum RestaurantReviews implements Category {
+    public static enum RestaurantReviewCount implements Category {
 
-        FEW {
+        SMALL_COUNT {
+
             @Override
             public Integer getColor() {
-                return 0xFFff7f00;
+                return 0xFF33a02c;
             }
         },
-        MANY {
+        MEDIUM_COUNT {
+
             @Override
             public Integer getColor() {
-                return 0xFFff7f00;
+                return 0xFFb15928;
+            }
+        },
+        LARGE_COUNT {
+
+            @Override
+            public Integer getColor() {
+                return 0xFFb2df8a;
             }
         };
 
@@ -157,8 +166,10 @@ public class Restaurant {
     }
 
     private final String myName, myID;
+
     private final Location myLocation;
 
+    private final RestaurantReviewCount myReviewCount;
     private final RestaurantType myType;
     private final RestaurantRating myRating;
 
@@ -166,8 +177,10 @@ public class Restaurant {
         myName = builder.myName;
         myID = builder.myID;
         myLocation = builder.myLocation;
+
         myType = builder.myType;
         myRating = builder.myRating;
+        myReviewCount = builder.myReviewCount;
     }
 
     public String getName() {
@@ -176,6 +189,10 @@ public class Restaurant {
 
     public Location getLocation() {
         return myLocation;
+    }
+
+    public RestaurantReviewCount getReviewCount() {
+        return myReviewCount;
     }
 
     public RestaurantType getType() {
@@ -190,11 +207,13 @@ public class Restaurant {
         return myID.hashCode();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return myName + " : " + myID;
     }
 
-    @Override public boolean equals(Object o) {
+    @Override
+    public boolean equals(Object o) {
         boolean result = (o instanceof Restaurant);
 
         if (result) {
@@ -208,6 +227,7 @@ public class Restaurant {
         private String myName, myID;
         private Location myLocation;
 
+        private RestaurantReviewCount myReviewCount;
         private RestaurantType myType;
         private RestaurantRating myRating;
 
@@ -229,8 +249,17 @@ public class Restaurant {
             return this;
         }
 
+        public RestaurantReviewCount getReviewCount() {
+            return myReviewCount;
+        }
+
         public RestaurantBuilder type(RestaurantType type) {
             myType = type;
+            return this;
+        }
+
+        public RestaurantBuilder reviewCount(RestaurantReviewCount count) {
+            myReviewCount = count;
             return this;
         }
 
@@ -239,36 +268,16 @@ public class Restaurant {
             return this;
         }
 
-        public RestaurantBuilder rating(double rating) {
-            if (rating == 3.0) {
-                myRating = RestaurantRating.THREE;
-            }
-            else if (rating == 3.5) {
-                myRating = RestaurantRating.THREE_POINT_FIVE;
-            }
-            else if (rating == 4.0) {
-                myRating = RestaurantRating.FOUR;
-            }
-            else if (rating == 4.5) {
-                myRating = RestaurantRating.FOUR_POINT_FIVE;
-            }
-            else {
-                throw new IllegalArgumentException("Unknown rating: " + rating
-                        + ". Use the range (3.0 - 4.5) with increments of .5.");
-            }
-            return this;
-        }
-
         @Override
         public Restaurant build() {
-            if (myType == null) {
-                throw new IllegalStateException("Null restaurant type. All"
-                        + " restaurants must have a type.");
+            if (myType == null || myRating == null || myReviewCount == null) {
+                throw new IllegalStateException("Null category detected. All"
+                        + " categories must be non-null.");
             }
 
             if (myLocation == null) {
                 throw new IllegalStateException("Null location. All"
-                        + " restaurants must have a valid location.");
+                        + " restaurants must have a non-null location.");
             }
             return new Restaurant(this);
         }

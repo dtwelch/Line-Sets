@@ -20,10 +20,8 @@ package setvis;
 import controlP5.Button;
 import controlP5.ControlP5;
 import de.fhpotsdam.unfolding.UnfoldingMap;
-import de.fhpotsdam.unfolding.data.MarkerFactory;
 import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.Marker;
-import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
@@ -37,6 +35,7 @@ import processing.data.JSONArray;
 import processing.data.JSONObject;
 import setvis.Restaurant.RestaurantType;
 import setvis.Restaurant.RestaurantRating;
+import setvis.Restaurant.RestaurantReviewCount;
 import setvis.Restaurant.RestaurantBuilder;
 import setvis.gui.Gui;
 
@@ -78,10 +77,10 @@ public class LineSets extends PApplet {
         //Sets up the controlP5 buttons
         createCategoryControlPanels();
 
-        //Parse the data and create our own Restaurant objects
+        //Parses the data and creates our own Restaurant objects
         preprocessInput();
 
-        //Uses 2-opt TSP heuristic to find a reasonable restaurant ordering
+        //Uses a 2-opt TSP heuristic to find a reasonable restaurant ordering
         computeAndUpdateRestaurantOrderings();
 
         //Adds restaurant markers to the unfolding background map
@@ -89,13 +88,13 @@ public class LineSets extends PApplet {
     }
 
     /**
-     * <p>The main draw 'loop'. This is executed repeatedly after
-     * {@link #setup()}.</p>
+     * <p>The main draw loop. This is executed repeatedly after a single
+     * execution of {@link #setup()}.</p>
      */
     @Override public void draw() {
         myBackgroundMap.draw();
         drawActiveCurves();
-        drawRestaurantMarkers();    //Re-draw the markers ontop of curves
+        drawRestaurantMarkers();    //Re-draw the markers on top of curves
         drawCategoryPanels();
     }
 
@@ -118,11 +117,15 @@ public class LineSets extends PApplet {
 
     /**
      * <p>Initializes and sets parameters such as default zoom levels and
-     * panning boundaries for the background citymap.</p>
+     * panning boundaries for the background map.</p>
      */
     private void createMapBackground() {
         myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
-        myBackgroundMap.zoomAndPanTo(12, new Location(47.626, -122.337));
+
+        Location defaultLocation = new Location(47.626, -122.337);
+        myBackgroundMap.zoomAndPanTo(12, defaultLocation);
+        myBackgroundMap.setPanningRestriction(defaultLocation, 4);
+        myBackgroundMap.setZoomRange(13, 17);
         myBackgroundMap.zoomToLevel(13);
         myBackgroundMap.setBackgroundColor(0);
 
@@ -148,8 +151,8 @@ public class LineSets extends PApplet {
     }
 
     /**
-     * <p>Draws a smooth curve through all points in the subcategories
-     * maintained by <code>myActiveSelections</code>.</p>
+     * <p>Draws a smooth curve through all subcategories maintained by
+     * <code>myActiveSelections</code>.</p>
      */
     private void drawActiveCurves() {
 
@@ -186,8 +189,8 @@ public class LineSets extends PApplet {
     }
 
     /**
-     * <p>Computes for each category a 2-opt ordering of its contained
-     * {@link Restaurant}s.</p>
+     * <p>Computes, for each category, a 2-opt ordering of the contained
+     * restaurants.</p>
      */
     private void computeAndUpdateRestaurantOrderings() {
         for (Map.Entry<Category, List<Restaurant>> e : mySubCategories
@@ -248,7 +251,7 @@ public class LineSets extends PApplet {
         text("Rating", plotX1 + 255, plotY1 + 25);
 
         fill(130, 130, 130, 210);
-        rect(plotX1 + 390, plotY1 + 10, 130, plotY2 - 5, 6);
+        rect(plotX1 + 390, plotY1 + 10, 180, plotY2 - 5, 6);
         fill(240);
         text("Review Count", plotX1 + 395, plotY1 + 25);
     }
@@ -258,13 +261,13 @@ public class LineSets extends PApplet {
                 new ControlP5(this, createFont("Helvetica-Bold", 8));
         frameRate(25);
 
+        Gui.createRestaurantReviewCountButtons(myControls, plotX1, plotY1);
         Gui.createRestaurantTypeButtons(myControls, plotX1, plotY1);
         Gui.createRestaurantRatingButtons(myControls, plotX1, plotY1);
-        //Gui.createRestaurantPriceButtons(myControls, plotX1, plotY1);
     }
 
     //TODO: The following methods should really go in some kind of dedicated,
-    //self contained listener class.
+    //self-contained listener class.
     private void american(int theValue) {
         updateActiveSelection("american", RestaurantType.AMERICAN);
     }
@@ -296,6 +299,21 @@ public class LineSets extends PApplet {
 
     private void fourPointFive(int theValue) {
         updateActiveSelection("fourPointFive", RestaurantRating.FOUR_POINT_FIVE);
+    }
+
+    private void smallReviewCount(int theValue) {
+        updateActiveSelection("smallReviewCount",
+                RestaurantReviewCount.SMALL_COUNT);
+    }
+
+    private void mediumReviewCount(int theValue) {
+        updateActiveSelection("mediumReviewCount",
+                RestaurantReviewCount.MEDIUM_COUNT);
+    }
+
+    private void largeReviewCount(int theValue) {
+        updateActiveSelection("largeReviewCount",
+                RestaurantReviewCount.LARGE_COUNT);
     }
 
     private void updateActiveSelection(String name, Category category) {
@@ -335,13 +353,14 @@ public class LineSets extends PApplet {
                     new RestaurantBuilder(o.getString("name"))
                         .id(o.getString("id"))
                         .type(getType(o, o.getJSONArray("categories")))
-                        .rating(o.getDouble("rating"))
+                        .rating(getRating(o.getDouble("rating")))
+                        .reviewCount(getReviewCt(o.getDouble("review_count")))
                         .location(coord.getFloat("latitude"),
                                 coord.getFloat("longitude"));
 
             Restaurant complete = restaurant.build();
             addToAppropriateSets(complete, complete.getType(),
-                    complete.getRating());
+                    complete.getRating(), complete.getReviewCount());
         }
     }
 
@@ -404,6 +423,42 @@ public class LineSets extends PApplet {
         return result;
     }
 
+    public RestaurantReviewCount getReviewCt(double count) {
+        RestaurantReviewCount result = null;
+
+        if (count <= 100) {
+            result = RestaurantReviewCount.SMALL_COUNT;
+        }
+        else if (count > 100 && count < 300) {
+            result = RestaurantReviewCount.MEDIUM_COUNT;
+        }
+        else {
+            result = RestaurantReviewCount.LARGE_COUNT;
+        }
+        return result;
+    }
+
+    public RestaurantRating getRating(double rating) {
+        RestaurantRating result = null;
+
+        if (rating == 3.0) {
+            result = RestaurantRating.THREE;
+        }
+        else if (rating == 3.5) {
+            result = RestaurantRating.THREE_POINT_FIVE;
+        }
+        else if (rating == 4.0) {
+            result = RestaurantRating.FOUR;
+        }
+        else if (rating == 4.5) {
+            result = RestaurantRating.FOUR_POINT_FIVE;
+        }
+        else {
+            throw new IllegalArgumentException("Unknown rating: " + rating
+                    + ". Use the range (3.0 - 4.5) with increments of .5.");
+        }
+        return result;
+    }
 
     /**
      * <p>Sounds the alarm if the entry we're trying to add shares an ID
