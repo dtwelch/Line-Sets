@@ -141,21 +141,21 @@ public class Restaurant {
 
             @Override
             public Integer getColor() {
-                return 0xFFff7f00;
+                return 0xFF33a02c;
             }
         },
         MEDIUM_COUNT {
 
             @Override
             public Integer getColor() {
-                return 0xFFff7f00;
+                return 0xFFb15928;
             }
         },
         LARGE_COUNT {
 
             @Override
             public Integer getColor() {
-                return 0xFFff7f00;
+                return 0xFFb2df8a;
             }
         };
 
