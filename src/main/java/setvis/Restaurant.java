@@ -111,7 +111,7 @@ public class Restaurant {
 
             @Override
             public Integer getColor() {
-                return 0xFFe31a1c;
+                return 0xFF6a3d9a;
             }
         },
         FOUR {
