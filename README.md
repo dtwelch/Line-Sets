@@ -1,7 +1,7 @@
 An Implementation of LineSets in Processing/Java
 =========
 
-![inaction](https://github.com/dtwelch/Line-Sets/tree/master/images/linesets.png)
+![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/linesets.png)
 
 This small project is an implementation of a set based visualization technique known as LineSets. For more 
 information on LineSets, see:
