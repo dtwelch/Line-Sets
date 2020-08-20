@@ -15,13 +15,13 @@ The easiest way to get this running at the moment is the following:
 
 1. Download [IntelliJ Community Edition](https://www.jetbrains.com/idea/download/#section=mac)
 
-2. Clone the this repo to a directory of your choosing (I'm using  `~/Documents`)
+2. Clone the this repo to a directory of your choosing (I'm using `~/Documents`)
 
 3. Fire up IntelliJ and click 'open' when the intro screen arrives:
-![inaction](https://github.com/dtwelch/Line-Sets/tree/master/images/01.png)
+![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/01.png)
 
 4. Navigate to the directory where the repository was cloned and select the `Line-Sets` folder:
-![inaction](https://github.com/dtwelch/Line-Sets/tree/master/images/02.png)
+![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/02.png)
 
 5. Once opened, IntelliJ will ask if you want to make this a maven project; do it, then IntelliJ
 should start downloading dependencies
@@ -29,19 +29,19 @@ should start downloading dependencies
 6. Once this is done, you'll notice a number of errors persist. To resolve these, we'll need to manually add
 some library `.jar` files that are not available on the maven central repo. To do this, first click the 
 project structure button (identified with the arrow):
-![inaction](https://github.com/dtwelch/Line-Sets/tree/master/images/03.png)
+![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/03.png)
 
-7. Next, go down to area named 'global libraries' and press the plus button 
-![inaction](https://github.com/dtwelch/Line-Sets/tree/master/images/04.png)
+7. Next, go down to area named 'global libraries' and press the plus button (after pressing, select Java)
+![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/04.png)
 
-then select Java
+
 
 8. Once you've clicked 'Java' a file browser will open. Navigate to the `libs` folder (within the repo) and select one of 
 the `.jar` files, then press OK (and you may be prompted again, so just click ok). 
 You should now see the jar you selected in the global libraries right hand pane (now follow the same process for the other jar). 
 When you're done, it should look like this:
 
-![inaction](https://github.com/dtwelch/Line-Sets/tree/master/images/05.png)
+![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/05.png)
 
 9. After you've clicked ok and libraries window has closed, the IDE shouldn no longer be reporting errors (i.e.: no red-squiggly lines) 
 in the `src/main/java/setvis/LineSets.java` file; make sure this is the case before proceeding.
@@ -49,12 +49,12 @@ in the `src/main/java/setvis/LineSets.java` file; make sure this is the case bef
 10. Finally, to run it, we must create a 'run-configuration'. To do this, at the top of the 
 IDE's main pane you should see a box titled: "Add Configuration". Click it and then follow the steps numbered:
 
-![inaction](https://github.com/dtwelch/Line-Sets/tree/master/images/06.png)
+![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/06.png)
 
 11. We now have an empty run configuration (you can name it if you like), before closing we need to identify the 
 class which will execute our program (i.e., the one titled Main.java):
 
-![inaction](https://github.com/dtwelch/Line-Sets/tree/master/images/07.png)
+![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/07.png)
 
 After this you can run the program by pressing the green play button at the top of the IDE's pane. 
 
