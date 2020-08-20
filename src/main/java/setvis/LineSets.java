@@ -268,6 +268,8 @@ public class LineSets extends PApplet {
     // This method is invoked automatically by the global variable: myControls
     // See Gui.createRestaurantTypeButtons(..) for details. Basically, the name you give the button has to match
     // the name of the method you want invoked when it's clicked (and it has to have a single parameter of type bool)
+    // Also: each of these callback methods needs to be *public*, or controlP5 will silently error and your buttons
+    //       won't work
     public void american(boolean theValue) {
         updateActiveSelection("american", RestaurantType.AMERICAN);
     }
