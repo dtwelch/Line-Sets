@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class RestaurantMarker extends SimplePointMarker {
 
-    private Set<Category> myActiveIntersections = new LinkedHashSet<>();
+    private Set<RestaurantCategory> myActiveIntersections = new LinkedHashSet<>();
     protected String myName;
     protected int space = 10;
 
@@ -51,11 +51,11 @@ public class RestaurantMarker extends SimplePointMarker {
         return myName;
     }
 
-    public void addIntersection(Category category) {
+    public void addIntersection(RestaurantCategory category) {
         myActiveIntersections.add(category);
     }
 
-    public void removeIntersection(Category category) {
+    public void removeIntersection(RestaurantCategory category) {
         myActiveIntersections.remove(category);
     }
 
@@ -74,10 +74,10 @@ public class RestaurantMarker extends SimplePointMarker {
         if (selected) { pg.translate(0, 0); }
 
         int initialSize = 13;
-        for (Category category : myActiveIntersections) {
+        for (RestaurantCategory category : myActiveIntersections) {
             pg.noFill();
             pg.strokeWeight(5);
-            pg.stroke(category.getColor());
+            pg.stroke(category.getAssignedColor());
             pg.ellipse(x, y, initialSize, initialSize);
             initialSize += 10;
         }

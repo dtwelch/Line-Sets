@@ -128,17 +128,7 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>controlP5</groupId>
-            <artifactId>controlP5</artifactId>
-            <version>2.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>unfolding</groupId>
-            <artifactId>unfolding</artifactId>
-            <version>2.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>processing</groupId>
+            <groupId>org.processing</groupId>
             <artifactId>core</artifactId>
             <version>2.2.1</version>
         </dependency>

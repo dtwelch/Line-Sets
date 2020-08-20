@@ -20,9 +20,9 @@ package setvis;
 /**
  * @author Dwelch <dtw.welch@gmail.com>
  */
-public interface Category {
+public interface RestaurantCategory {
 
-    public Integer getColor();
+    public Integer getAssignedColor();
 
     public String getCategoryDescription();
 }

@@ -37,25 +37,25 @@ public class Gui {
         Button american = cp5.addButton("american");
         american.setPosition(plotX1 + 20, plotY1 + 35).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantType.AMERICAN.getColor()).setSwitch(
-                        true);
+                .setColorActive(RestaurantType.AMERICAN.getAssignedColor())
+                .setSwitch(true);
 
         Button italian = cp5.addButton("italian");
         italian.setPosition(plotX1 + 20 + 110, plotY1 + 35).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantType.ITALIAN.getColor()).setSwitch(
-                        true);
+                .setColorActive(RestaurantType.ITALIAN.getAssignedColor())
+                .setSwitch(true);
 
         Button asian = cp5.addButton("asian");
         asian.setPosition(plotX1 + 20, plotY1 + 60).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantType.ASIAN.getColor())
+                .setColorActive(RestaurantType.ASIAN.getAssignedColor())
                 .setSwitch(true);
 
         Button mexican = cp5.addButton("mexican");
         mexican.setPosition(plotX1 + 20 + 110, plotY1 + 60).setSize(100, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantType.MEXICAN.getColor()).setSwitch(
+                .setColorActive(RestaurantType.MEXICAN.getAssignedColor()).setSwitch(
                         true);
     }
 
@@ -64,50 +64,53 @@ public class Gui {
         Button three = cp5.addButton("three");
         three.setPosition(plotX1 + 260, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantRating.THREE.getColor()).setSwitch(
+                .setColorActive(RestaurantRating.THREE.getAssignedColor()).setSwitch(
                         true).setCaptionLabel("3").getCaptionLabel().align(
                         PApplet.CENTER, PApplet.CENTER);
 
         Button threePointFive = cp5.addButton("threePointFive");
         threePointFive.setPosition(plotX1 + 290, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantRating.THREE_POINT_FIVE.getColor())
+                .setColorActive(RestaurantRating.THREE_POINT_FIVE.getAssignedColor())
                 .setSwitch(true).setCaptionLabel("3.5").getCaptionLabel()
                 .align(PApplet.CENTER, PApplet.CENTER);
 
         Button four = cp5.addButton("four");
         four.setPosition(plotX1 + 320, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantRating.FOUR.getColor()).setSwitch(
+                .setColorActive(RestaurantRating.FOUR.getAssignedColor()).setSwitch(
                         true).setCaptionLabel("4.0").getCaptionLabel().align(
                         PApplet.CENTER, PApplet.CENTER);
 
         Button fourPointFive = cp5.addButton("fourPointFive");
         fourPointFive.setPosition(plotX1 + 350, plotY1 + 35).setSize(20, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantRating.FOUR_POINT_FIVE.getColor())
+                .setColorActive(RestaurantRating.FOUR_POINT_FIVE.getAssignedColor())
                 .setSwitch(true).setCaptionLabel("4.5").getCaptionLabel()
                 .align(PApplet.CENTER, PApplet.CENTER);
     }
 
     public static void createRestaurantReviewCountButtons(ControlP5 cp5,
             float plotX1, float plotY1) {
+
+        //ah, so with ControlP5 naming the button will automatically invoke a method by that name in LineSets.java
+        //so clicking the 100..100 button in the apps ui *should* invoke LineSet.java's smallReviewCount(..) method.
         Button smallReviewCt = cp5.addButton("smallReviewCount");
         smallReviewCt.setPosition(plotX1 + 400, plotY1 + 35).setSize(50, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantReviewCount.SMALL_COUNT.getColor())
+                .setColorActive(RestaurantReviewCount.SMALL_COUNT.getAssignedColor())
                 .setSwitch(true).setCaptionLabel("100 .. 100");
 
         Button mediumReviewCt = cp5.addButton("mediumReviewCount");
         mediumReviewCt.setPosition(plotX1 + 455, plotY1 + 35).setSize(50, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantReviewCount.MEDIUM_COUNT.getColor())
+                .setColorActive(RestaurantReviewCount.MEDIUM_COUNT.getAssignedColor())
                 .setSwitch(true).setCaptionLabel("101 .. 300");
 
         Button largeReviewCt = cp5.addButton("largeReviewCount");
         largeReviewCt.setPosition(plotX1 + 510, plotY1 + 35).setSize(50, 20)
                 .setColorBackground(0xFF414141).setColorForeground(0xFF5A5A5A)
-                .setColorActive(RestaurantReviewCount.LARGE_COUNT.getColor())
+                .setColorActive(RestaurantReviewCount.LARGE_COUNT.getAssignedColor())
                 .setSwitch(true).setCaptionLabel("301 .. 800");
     }
 }

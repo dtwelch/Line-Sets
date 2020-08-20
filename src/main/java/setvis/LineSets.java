@@ -22,7 +22,7 @@ import controlP5.ControlP5;
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.Marker;
-import de.fhpotsdam.unfolding.providers.Google;
+import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import org.jgrapht.Graphs;
@@ -49,10 +49,10 @@ import java.util.*;
 */
 public class LineSets extends PApplet {
 
-    private final Map<Category, List<Restaurant>> mySubCategories =
+    private final Map<RestaurantCategory, List<Restaurant>> mySubCategories =
             new HashMap<>();
 
-    private final Map<Category, List<Restaurant>> myActiveSelections =
+    private final Map<RestaurantCategory, List<Restaurant>> myActiveSelections =
             new HashMap<>();
 
     private final Map<Restaurant, RestaurantMarker> myMarkers =
@@ -120,13 +120,12 @@ public class LineSets extends PApplet {
      * panning boundaries for the background map.</p>
      */
     private void createMapBackground() {
-        myBackgroundMap = new UnfoldingMap(this, new Google.GoogleMapProvider());
+        myBackgroundMap = new UnfoldingMap(this, new Microsoft.RoadProvider());
 
         Location defaultLocation = new Location(47.626, -122.337);
         myBackgroundMap.zoomAndPanTo(12, defaultLocation);
         myBackgroundMap.setPanningRestriction(defaultLocation, 4);
-        myBackgroundMap.setZoomRange(13, 17);
-        myBackgroundMap.zoomToLevel(13);
+        myBackgroundMap.setZoomRange(13, 30);
         myBackgroundMap.setBackgroundColor(0);
 
         MapUtils.createDefaultEventDispatcher(this, myBackgroundMap);
@@ -156,7 +155,7 @@ public class LineSets extends PApplet {
      */
     private void drawActiveCurves() {
 
-        for (Map.Entry<Category, List<Restaurant>> e : myActiveSelections
+        for (Map.Entry<RestaurantCategory, List<Restaurant>> e : myActiveSelections
                 .entrySet()) {
             List<Restaurant> curRestaurants = e.getValue();
 
@@ -167,7 +166,7 @@ public class LineSets extends PApplet {
 
                 beginShape();
                 noFill();
-                stroke(e.getKey().getColor());
+                stroke(e.getKey().getAssignedColor());
                 strokeWeight(7);
                 curveVertex(first.x, first.y);
 
@@ -193,13 +192,13 @@ public class LineSets extends PApplet {
      * restaurants.</p>
      */
     private void computeAndUpdateRestaurantOrderings() {
-        for (Map.Entry<Category, List<Restaurant>> e : mySubCategories
+        for (Map.Entry<RestaurantCategory, List<Restaurant>> e : mySubCategories
                 .entrySet()) {
             computeAndUpdateRestaurantOrderings(e.getKey());
         }
     }
 
-    private void computeAndUpdateRestaurantOrderings(Category category) {
+    private void computeAndUpdateRestaurantOrderings(RestaurantCategory category) {
         SimpleWeightedGraph<Restaurant, DefaultWeightedEdge> g =
                 new SimpleWeightedGraph<>(DefaultWeightedEdge.class);
 
@@ -257,8 +256,8 @@ public class LineSets extends PApplet {
     }
 
     public void createCategoryControlPanels(){
-        myControls =
-                new ControlP5(this, createFont("Helvetica-Bold", 8));
+
+        myControls = new ControlP5(this, createFont("Helvetica-Bold", 8));
         frameRate(25);
 
         Gui.createRestaurantReviewCountButtons(myControls, plotX1, plotY1);
@@ -266,57 +265,68 @@ public class LineSets extends PApplet {
         Gui.createRestaurantRatingButtons(myControls, plotX1, plotY1);
     }
 
-    //TODO: The following methods should really go in some kind of dedicated,
-    //self-contained listener class.
-    private void american(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    // See Gui.createRestaurantTypeButtons(..) for details. Basically, the name you give the button has to match
+    // the name of the method you want invoked when it's clicked (and it has to have a single parameter of type bool)
+    public void american(boolean theValue) {
         updateActiveSelection("american", RestaurantType.AMERICAN);
     }
 
-    private void italian(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void italian(boolean theValue) {
         updateActiveSelection("italian", RestaurantType.ITALIAN);
     }
 
-    private void asian(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void asian(boolean theValue) {
         updateActiveSelection("asian", RestaurantType.ASIAN);
     }
 
-    private void mexican(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void mexican(boolean theValue) {
         updateActiveSelection("mexican", RestaurantType.MEXICAN);
     }
 
-    private void three(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void three(boolean theValue) {
         updateActiveSelection("three", RestaurantRating.THREE);
     }
 
-    private void threePointFive(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void threePointFive(boolean theValue) {
         updateActiveSelection("threePointFive",
                 RestaurantRating.THREE_POINT_FIVE);
     }
 
-    private void four(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void four(boolean theValue) {
         updateActiveSelection("four", RestaurantRating.FOUR);
     }
 
-    private void fourPointFive(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void fourPointFive(boolean theValue) {
         updateActiveSelection("fourPointFive", RestaurantRating.FOUR_POINT_FIVE);
     }
 
-    private void smallReviewCount(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void smallReviewCount(boolean theValue) {
         updateActiveSelection("smallReviewCount",
                 RestaurantReviewCount.SMALL_COUNT);
     }
 
-    private void mediumReviewCount(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void mediumReviewCount(boolean theValue) {
         updateActiveSelection("mediumReviewCount",
                 RestaurantReviewCount.MEDIUM_COUNT);
     }
 
-    private void largeReviewCount(int theValue) {
+    // This method is invoked automatically by the global variable: myControls
+    public void largeReviewCount(boolean theValue) {
         updateActiveSelection("largeReviewCount",
                 RestaurantReviewCount.LARGE_COUNT);
     }
 
-    private void updateActiveSelection(String name, Category category) {
+    private void updateActiveSelection(String name, RestaurantCategory category) {
 
         if (myActiveSelections.get(category) == null) {
             myActiveSelections.put(category, new LinkedList<Restaurant>());
@@ -370,12 +380,12 @@ public class LineSets extends PApplet {
      *
      * @param e An instance of {@link Restaurant}.
      */
-    private void addToAppropriateSets(Restaurant e, Category ... categories) {
+    private void addToAppropriateSets(Restaurant e, RestaurantCategory... categories) {
         addToAppropriateSets(e, Arrays.asList(categories));
     }
 
-    private void addToAppropriateSets(Restaurant e, List<Category> categories) {
-        for (Category category : categories) {
+    private void addToAppropriateSets(Restaurant e, List<RestaurantCategory> categories) {
+        for (RestaurantCategory category : categories) {
             if (mySubCategories.get(category) == null) {
                 mySubCategories.put(category, new LinkedList<Restaurant>());
             }

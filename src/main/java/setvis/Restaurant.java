@@ -28,7 +28,7 @@ import de.fhpotsdam.unfolding.geo.Location;
  */
 public class Restaurant {
 
-    public static enum RestaurantType implements Category {
+    public static enum RestaurantType implements RestaurantCategory {
         AMERICAN {
 
             @Override
@@ -37,7 +37,7 @@ public class Restaurant {
             }
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFF1b9e77;
             }
         },
@@ -49,7 +49,7 @@ public class Restaurant {
             }
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFFF2003C;
             }
         },
@@ -62,7 +62,7 @@ public class Restaurant {
             }
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFF1f78b4;
             }
         },
@@ -74,7 +74,7 @@ public class Restaurant {
             }
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFFb2df8a;
             }
         };
@@ -98,33 +98,33 @@ public class Restaurant {
         }
     }
 
-    public static enum RestaurantRating implements Category {
+    public enum RestaurantRating implements RestaurantCategory {
 
         THREE {
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFFfb9a99;
             }
         },
         THREE_POINT_FIVE {
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFF6a3d9a;
             }
         },
         FOUR {
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFFfdbf6f;
             }
         },
         FOUR_POINT_FIVE {
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFFff7f00;
             }
         };
@@ -135,26 +135,26 @@ public class Restaurant {
         }
     }
 
-    public static enum RestaurantReviewCount implements Category {
+    public enum RestaurantReviewCount implements RestaurantCategory {
 
         SMALL_COUNT {
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFF33a02c;
             }
         },
         MEDIUM_COUNT {
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFFb15928;
             }
         },
         LARGE_COUNT {
 
             @Override
-            public Integer getColor() {
+            public Integer getAssignedColor() {
                 return 0xFFb2df8a;
             }
         };
