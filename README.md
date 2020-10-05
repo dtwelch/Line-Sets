@@ -20,7 +20,7 @@ The easiest way to get this running at the moment is the following:
 3. Fire up IntelliJ and click 'open' when the intro screen arrives:
 ![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/01.png)
 
-4. Navigate to the directory where the repository was cloned and select the `Line-Sets` folder:
+4. Navigate to the directory where the repository was cloned and select the `LineSets` folder:
 ![inaction](https://github.com/dtwelch/Line-Sets/blob/master/images/02.png)
 
 5. Once opened, IntelliJ will ask if you want to make this a maven project; do it, then IntelliJ
